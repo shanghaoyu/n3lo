@@ -37,31 +37,37 @@ c    thier variable z means cos(theta)
          real*8 ::mpi=138.0390d0
          real*8 ::mpi0=134.9766d0
          real*8 ::mpipm=139.5702d0
+         real*8 ::mass=938.9182d0
          real*8 ::fpi=92.4d0
          real*8 ::tidelambda=650.0d0
          real*8 ::c1=-0.74d0
          real*8 ::c2=0.0d0
          real*8 ::c3=-3.61d0
          real*8 ::c4=2.44d0
+         contains
+         subroutine ini_const
+c      this subroutine should been used in the main programm            
+            mpi=mpi/mass
+            mpi0=mpi0/mass
+            mpipm=mpipm/mass
+            fpi=fpi/mass
+            tidelambda=tidelambda/mass
+         end subroutine
       end module
       module kqxy
-        use const
-        real*8,save :: xlab,ylab,mass,x,y,dwn,wnq,wn3,dwnq,x2,y2,c(24)
-        integer,save :: pottype
+        use const,only: mass
+        real*8,save :: xlab,ylab,x,y,dwn,wnq,wn3,dwnq,x2,y2,c(24)
 
         contains
 
           subroutine initialize 
             implicit real*8 (a-h,o-z)
-            real*8 wnn(3)
             real*8 matrix1(9,9),matrix2(15,15)
             real*8 t(24)
             logical :: parlsj=.true.
-            common /cnn/ inn
             common /cpot/ v(6),xmev,ymev
             real*8 conta(24)            
             common /con/ conta
-            data wnn /938.272d0,938.9182d0,939.5653d0/
             data((matrix1(j,i),i=1,9),j=1,9)/
      1 0.0198943d0,       0.0d0,       0.0d0,       0.0d0,        0.0d0,
      * 0.0596831d0,       0.0d0,       0.0d0,       0.0d0,
@@ -144,8 +150,6 @@ c   here we evaluate the number we use
                         
             xlab=xmev
             ylab=ymev
-            pottype=inn
-            mass=wnn(pottype)
             dwn=1.0d0/mass
             wnq=mass*mass
             wn3=mass*mass*mass
@@ -238,7 +242,7 @@ c   function w(q) in (20) PRC 66,014002(2002)
           real*8 function wfunc(z)
              implicit real*8 (a-h,o-z)
              real*8 z    
-             wfunc=dsqrt(4.0d0*(mpi*dwn)**2+normq(z)**2)
+             wfunc=dsqrt(4.0d0*(mpi)**2+normq(z)**2)
              return
           end function
 c   function L(q) in (19) PRC 66,014002(2002)         
@@ -248,14 +252,14 @@ c   function L(q) in (19) PRC 66,014002(2002)
             logical :: SFC=.true.
 c   SFC means spectrum function cutoff            
             if (SFC)then
-            lfunc=wfunc(z)/(2.0d0*normq(z))*dlog(((tidelambda*dwn)**2
-     1       *(2.0d0*(mpi*dwn)**2+normq(z)**2)-2.0d0*(mpi*dwn)**2
-     2      *normq(z)**2+tidelambda*dwn*dsqrt((tidelambda*dwn)**2
-     3      -4.0d0*(mpi*dwn)**2)*normq(z)*wfunc(z))
-     4      /(2.0d0*(mpi*dwn)**2*((tidelambda*dwn)**2+normq(z)**2)))
+            lfunc=wfunc(z)/(2.0d0*normq(z))*dlog(((tidelambda)**2
+     1       *(2.0d0*(mpi)**2+normq(z)**2)-2.0d0*(mpi)**2
+     2      *normq(z)**2+tidelambda*dsqrt((tidelambda)**2
+     3      -4.0d0*(mpi)**2)*normq(z)*wfunc(z))
+     4      /(2.0d0*(mpi)**2*((tidelambda)**2+normq(z)**2)))
             else  
             lfunc=wfunc(z)/normq(z)*dlog((wfunc(z)+normq(z))
-     1       /(2.0d0*mpi*dwn))
+     1       /(2.0d0*mpi))
             end if 
             return
           end function
@@ -264,12 +268,12 @@ c   SFC means spectrum function cutoff
           real*8 z
            logical :: SFC=.true.
            if (SFC)then 
-            afunc=datan((normq(z)*(tidelambda*dwn-2.0d0*mpi*dwn))/
-     1       (normq(z)**2+2.0d0*tidelambda*mpi*dwn**2))
+            afunc=datan((normq(z)*(tidelambda-2.0d0*mpi))/
+     1       (normq(z)**2+2.0d0*tidelambda*mpi))
      2      /(2.0d0*normq(z))
            else
 c   tidelambda = infinity 
-            afunc=datan(normq(z)/(2.0d0*mpi*dwn))/(2.0d0*normq(z))
+            afunc=datan(normq(z)/(2.0d0*mpi))/(2.0d0*normq(z))
            end if 
            return
            end function
@@ -351,18 +355,18 @@ c type 3 using 2 variable form pade (1,1)/(1,1)
 
           real*8 function nlowc(z)
           real*8 z
-          nlowc=-lfunc(z)/(384.0d0*pi**2*(fpi*dwn)**4)
-     +    *(4.0d0*(mpi*dwn)**2*(5.0d0*ga**4-4.0d0*ga**2-1.0d0)
+          nlowc=-lfunc(z)/(384.0d0*pi**2*(fpi)**4)
+     +    *(4.0d0*(mpi)**2*(5.0d0*ga**4-4.0d0*ga**2-1.0d0)
      +    +normq(z)**2*(23.0d0*ga**4-10.0d0*ga**2-1.0d0)
-     +    +48.0d0*ga**4*(mpi*dwn)**4/wfunc(z)**2)
+     +    +48.0d0*ga**4*(mpi)**4/wfunc(z)**2)
           return
          end function
 
           real*8 function n2lovc(z)
           real*8 z
-          n2lovc=3.0d0*ga**2/(16.0d0*pi*(fpi*dwn)**4)
-     1     *(2.0d0*(mpi*dwn)**2*(c3-2.0d0*c1)*1.0d-3*mass
-     2     +c3*1.0d-3*mass*normq(z)**2)*(2.0d0*(mpi*dwn)**2
+          n2lovc=3.0d0*ga**2/(16.0d0*pi*(fpi)**4)
+     1     *(2.0d0*(mpi)**2*(c3-2.0d0*c1)*1.0d-3*mass
+     2     +c3*1.0d-3*mass*normq(z)**2)*(2.0d0*(mpi)**2
      3     +normq(z)**2)*afunc(z)
           return
       end function
@@ -478,8 +482,8 @@ c  form
 c   nlo vt
           real*8 function onepi(z,masspi)
           real*8 z,masspi
-          onepi=-ga**2/(4.0d0*(fpi*dwn)**2
-     +     *(normq(z)**2+(masspi*dwn)**2))
+          onepi=-ga**2/(4.0d0*(fpi)**2
+     +     *(normq(z)**2+(masspi)**2))
           return
           end function
 
@@ -503,13 +507,13 @@ c   nlo vt
            
           real*8 function nlovt(z)
           real*8 z
-          nlovt=-3.0d0*ga**4/(64.0d0*pi**2*(fpi*dwn)**4)*lfunc(z)
+          nlovt=-3.0d0*ga**4/(64.0d0*pi**2*(fpi)**4)*lfunc(z)
           return
          end function
 
           real*8 function n2lowt(z)
           real*8 z
-          n2lowt=-ga**2/(32.0d0*pi*(fpi*dwn)**4)
+          n2lowt=-ga**2/(32.0d0*pi*(fpi)**4)
      1   *c4*1.0d-3*mass*wfunc(z)**2*afunc(z)
           return
           end function

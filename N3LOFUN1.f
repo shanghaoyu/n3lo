@@ -5,6 +5,7 @@
       end module
       program main
              use phasecal
+             use const
              implicit real*8 (a-h,o-z)
             
 c     we use common conta(2)to pass on this para
@@ -22,6 +23,7 @@ c     to be specific,it's
              common /einject/ elab
              common /crdwrt/ kread,kwrite,kpunch,kda(9)          
              call getarg(1,filenum)
+             call ini_const
             open (unit=10,file='input'//filenum)
             open (unit=11,file='output'//filenum)
             kread=10
