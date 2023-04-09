@@ -58,13 +58,15 @@ c      this subroutine should been used in the main programm
             c4=c4*1.0d-3*mass
          end subroutine
       end module
-      module kqxy
+      module paravari
         use const
         real*8,save :: xlab,ylab,x,y,dwn,wnq,wn3,dwnq,x2,y2,c(24)
 
         contains
 
-          subroutine initialize 
+          subroutine ini_paravari
+c this subroutine should be used in potential subroutine
+cas it contains the variables often been used             
             implicit real*8 (a-h,o-z)
             real*8 matrix1(9,9),matrix2(15,15)
             real*8 t(24)
@@ -212,7 +214,12 @@ c    parameters in lsj;if it's .false.,using parameters in pphase
             c(4)=t(1)            
          end if
           end subroutine
-        
+         end module
+         module genfunc
+            use paravari
+c this module contains general functions will be used in
+c potential subroutine
+         contains
           real*8 function normk(z)
             implicit real*8 (a-h,o-z)
             real*8 z
@@ -281,15 +288,12 @@ c   tidelambda = infinity
            end if 
            return
            end function
-        
-        
-      end module
+        end module
 
 c    in module add-terms we can add potential terms arbitrary
       
       module addterms
-        use kqxy
-        use const
+        use genfunc
         
 c    we set some logical variable to control whether the terms 
 c    are contained(private),true means they are contained
@@ -697,9 +701,6 @@ c   0v(singlet), 1v(uncoupled triplet), v++, v--, v+-, v-+ (coupled)
       subroutine lsjvcentral(pot,vcentral,j)
 c        you should make sure that the initial subroutine 
 c        has been called once
-   
-c        global(x,y)
-         use kqxy
                 
 c        input         
          real*8,external :: vcentral
@@ -726,10 +727,7 @@ c        local
         subroutine lsjvspinspin(pot,vspinspin,j)
 c        you should make sure that the initial subroutine 
 c        has been called once
-   
-c        global(x,y)
-         use kqxy
-                
+                   
 c        input         
          real*8,external :: vspinspin
          integer j
@@ -756,7 +754,7 @@ c        you should make sure that the initial subroutine
 c        has been called once
    
 c        global(x,y)
-         use kqxy
+         use paravari,only:x,y,x2,y2
                 
 c        input         
          real*8,external :: vtensor
@@ -814,7 +812,6 @@ c       output
          end
 
         subroutine lsjdecomposition(pot,j)
-        use kqxy
         use addterms
         implicit real*8 (a-h,o-z)
         real*8 pot(6),jd,jdp1,jd2p1,temp1(6),temp2(6),vcct(6)
@@ -826,7 +823,7 @@ c       output
         real*8 lambda
         common /cut/ lambda
         
-        call initialize
+        call ini_paravari
         pot=0.0d0
         jd=dfloat(j)
         jdp1=jd+1.0d0
