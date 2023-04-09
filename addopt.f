@@ -52,10 +52,14 @@ c      this subroutine should been used in the main programm
             mpipm=mpipm/mass
             fpi=fpi/mass
             tidelambda=tidelambda/mass
+            c1=c1*1.0d-3*mass
+            c2=c2*1.0d-3*mass
+            c3=c3*1.0d-3*mass
+            c4=c4*1.0d-3*mass
          end subroutine
       end module
       module kqxy
-        use const,only: mass
+        use const
         real*8,save :: xlab,ylab,x,y,dwn,wnq,wn3,dwnq,x2,y2,c(24)
 
         contains
@@ -365,8 +369,8 @@ c type 3 using 2 variable form pade (1,1)/(1,1)
           real*8 function n2lovc(z)
           real*8 z
           n2lovc=3.0d0*ga**2/(16.0d0*pi*(fpi)**4)
-     1     *(2.0d0*(mpi)**2*(c3-2.0d0*c1)*1.0d-3*mass
-     2     +c3*1.0d-3*mass*normq(z)**2)*(2.0d0*(mpi)**2
+     1     *(2.0d0*(mpi)**2*(c3-2.0d0*c1)
+     2     +c3*normq(z)**2)*(2.0d0*(mpi)**2
      3     +normq(z)**2)*afunc(z)
           return
       end function
@@ -514,7 +518,7 @@ c   nlo vt
           real*8 function n2lowt(z)
           real*8 z
           n2lowt=-ga**2/(32.0d0*pi*(fpi)**4)
-     1   *c4*1.0d-3*mass*wfunc(z)**2*afunc(z)
+     1   *c4*wfunc(z)**2*afunc(z)
           return
           end function
           
