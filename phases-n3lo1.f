@@ -40,10 +40,8 @@ cpot 是potential的简称，下面用external声明pot是个函数，所以如�
       implicit real*8 (a-h,o-z)
       external pot
       real*8 elab(41)
-      real*8 cutoff
       common /alpha/ melab
       common /einject/ elab
-      common /cut/ cutoff
       common /crdwrt/ kread,kwrite,kpunch,kda(9)
 c
 c        arguments of the potential subroutine pot being called in this
@@ -151,7 +149,7 @@ c
 10111 format (i3)
 10112 format (' elab (mev) ',f10.4)
 10113 format (4d20.12)
-      cutoff=0.0d0
+      lambda=0.0d0
 c
 c上述是为了下面输出文件格式写得一些标注行
 cwrite可以对照输出文件看，kwrite是6，代表输出文件
@@ -263,7 +261,7 @@ c
       do i=1,24
       read (kread,9999) conta(i)
       end do
-      read(kread,*) cutoff
+      read(kread,*) lambda
       if (ising.ne.0) sing=.true.
       if (itrip.ne.0) trip=.true.
       if (icoup.ne.0) coup=.true.

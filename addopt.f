@@ -62,10 +62,11 @@ c      this subroutine should been used in the main programm
       module potential_global
 c     this module contains the global variable of the subroutine potential
 
-c     variables:v(6),xmev,ymev,conta(24)
+c     variables:v(6),xmev,ymev,conta(24),lambda
 c     input
       real*8 v(6),xmev,ymev
       real*8 conta(24)
+      real*8 lambda
              
       end module
       module paravari
@@ -831,6 +832,7 @@ c       output
 
         subroutine lsjdecomposition(pot,j)
         use addterms
+        use potential_global,only:lambda
         implicit real*8 (a-h,o-z)
         real*8 pot(6),jd,jdp1,jd2p1,temp1(6),temp2(6),vcct(6)
         real*8 nlowcel(6),nlovtel(6)
@@ -838,9 +840,6 @@ c       output
         real*8,external :: cutoff
         real*8,external :: alj
         integer j
-        real*8 lambda
-        common /cut/ lambda
-        
         call ini_paravari
         pot=0.0d0
         jd=dfloat(j)
