@@ -964,8 +964,13 @@ c   sigmak force part
         do i=1,6
         pot(i)=pot(i)/(2.0d0*pi)**3*dwnq/ree
         end do
-      
         
+        return
         end
 
 c   this function write the 3P2 contact terms 
+         subroutine n3lo500new
+         use potential_global,only:v,j
+         call lsjdecomposition(v,j)
+         return
+         end subroutine
