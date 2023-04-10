@@ -49,7 +49,7 @@ c
 c
 c        arguments and values of this subroutine
 c
-      common /cstate/ j,heform,sing,trip,coup,endep,label
+      common /cstate/ jhang,heform,sing,trip,coup,endep,label
       common /cnn/ inn
 c
 c
@@ -1472,7 +1472,7 @@ c
       common /cut/ cutoff
       common /crdwrt/ kread,kwrite,kpunch,kda(9)
 c
-      common /cstate/ j,heform,sing,trip,coup,endep,label
+      common /cstate/ jhang,heform,sing,trip,coup,endep,label
       logical heform,sing,trip,coup,endep
 c
 c
@@ -4056,7 +4056,7 @@ c        common blocks
 c
       common /crdwrt/ kread,kwrite,kpunch,kda(9)
 c
-      common /cstate/ j,heform,sing,trip,coup,endep,label
+      common /cstate/ jhang,heform,sing,trip,coup,endep,label
       logical heform,sing,trip,coup,endep
 c
 c
@@ -4279,7 +4279,7 @@ c
       implicit real*8 (a-h,o-z)
 c
       common /cpot/   v(6),xmev,ymev
-      common /cstate/ j,heform,sing,trip,coup,endep,label
+      common /cstate/ jhang,heform,sing,trip,coup,endep,label
       logical heform,sing,trip,coup,endep
 c
 c
@@ -4543,7 +4543,7 @@ c
 c
       common /crdwrt/ kread,kwrite,kpunch,kda(9)
 c
-      common /cstate/ j,heform,sing,trip,coup,endep,label
+      common /cstate/ jhang,heform,sing,trip,coup,endep,label
       logical heform,sing,trip,coup,endep
 c
 c

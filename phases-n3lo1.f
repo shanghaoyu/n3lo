@@ -47,7 +47,7 @@ c
 c        arguments of the potential subroutine pot being called in this
 c        program
 c
-      common /cstate/ j,heform,sing,trip,coup,endep,label
+      common /cstate/ jhang,heform,sing,trip,coup,endep,label
 c        xmev and ymev are the final and initial relative momenta,
 c        respectively, in units of mev.
 c        v is the potential in units of mev**(-2).

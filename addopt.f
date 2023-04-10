@@ -62,11 +62,14 @@ c      this subroutine should been used in the main programm
       module potential_global
 c     this module contains the global variable of the subroutine potential
 
-c     variables:v(6),xmev,ymev,conta(24),lambda
+c     variables:xmev,ymev,conta(24),lambda,j,v(6)
 c     input
-      real*8 v(6),xmev,ymev
+      real*8 xmev,ymev
       real*8 conta(24)
       real*8 lambda
+      integer j
+c     output
+      real*8 v(6)
              
       end module
       module paravari
@@ -81,7 +84,7 @@ c subroutine: ini_paravari
         contains
 
           subroutine ini_paravari
-            use potential_global
+            use potential_global,only:xmev,ymev,conta
 c this subroutine should be used in potential subroutine
 cas it contains the variables often been used             
             implicit real*8 (a-h,o-z)
