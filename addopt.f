@@ -31,7 +31,11 @@ c    function initialize evaluate the variables we use in this code
 
 c    function normk, normq means the length of vector k and q
 c    thier variable z means cos(theta)
-      module const 
+      module const
+
+c   variable:pi,ga,mpi,mpi0,mpipm,mass,fpi,tidelambda,c1,c2,c3,c4
+c   subroutine :ini_const
+
          real*8 ::pi=3.141592653589793d0
          real*8 ::ga=1.29d0
          real*8 ::mpi=138.0390d0
@@ -59,6 +63,11 @@ c      this subroutine should been used in the main programm
          end subroutine
       end module
       module paravari
+
+c variable:  pi,ga,mpi,mpi0,mpipm,mass,fpi,tidelambda,c1,c2,c3,c4(const)
+c             xlab,ylab,x,y,dwn,wnq,wn3,dwnq,x2,y2,c(24)
+c subroutine: ini_paravari      
+       
         use const
         real*8,save :: xlab,ylab,x,y,dwn,wnq,wn3,dwnq,x2,y2,c(24)
 
@@ -215,8 +224,15 @@ c    parameters in lsj;if it's .false.,using parameters in pphase
          end if
           end subroutine
          end module
+         
          module genfunc
+
+c variable: none
+c function:normk,normq,qdotk,kcrossq2,wfunc,lfunc,afunc
+            
             use paravari
+            private pi,ga,mpi,mpi0,mpipm,mass,fpi,tidelambda,
+     +       c1,c2,c3,c4,xlab,ylab,x,y,dwn,wnq,wn3,dwnq,x2,y2,c
 c this module contains general functions will be used in
 c potential subroutine
          contains
@@ -294,7 +310,7 @@ c    in module add-terms we can add potential terms arbitrary
       
       module addterms
         use genfunc
-        
+        use paravari
 c    we set some logical variable to control whether the terms 
 c    are contained(private),true means they are contained
         logical :: vc=.true.
