@@ -23,10 +23,6 @@ c
 c***********************************************************************   
 c    module kqxy contains the variable we use mostly in this code
 
-c    global varialbe xlab,yalb to deliver xmev and ymev,
-c    mass is the mass of n p or np
-c    pottype to deliver inn 
-
 c    function initialize evaluate the variables we use in this code
 
 c    function normk, normq means the length of vector k and q
@@ -62,25 +58,34 @@ c      this subroutine should been used in the main programm
             c4=c4*1.0d-3*mass
          end subroutine
       end module
+     
+      module potential_global
+c     this module contains the global variable of the subroutine potential
+
+c     variables:v(6),xmev,ymev
+c     input
+      real*8 v(6),xmev,ymev
+             
+      end module
       module paravari
 
 c variable:  pi,ga,mpi,mpi0,mpipm,mass,fpi,tidelambda,c1,c2,c3,c4(const)
-c             xlab,ylab,x,y,dwn,wnq,wn3,dwnq,x2,y2,c(24)
+c             x,y,dwn,wnq,wn3,dwnq,x2,y2,c(24)
 c subroutine: ini_paravari      
        
         use const
-        real*8,save :: xlab,ylab,x,y,dwn,wnq,wn3,dwnq,x2,y2,c(24)
+        real*8,save :: x,y,dwn,wnq,wn3,dwnq,x2,y2,c(24)
 
         contains
 
           subroutine ini_paravari
+            use potential_global
 c this subroutine should be used in potential subroutine
 cas it contains the variables often been used             
             implicit real*8 (a-h,o-z)
             real*8 matrix1(9,9),matrix2(15,15)
             real*8 t(24)
             logical :: parlsj=.true.
-            common /cpot/ v(6),xmev,ymev
             real*8 conta(24)            
             common /con/ conta
             data((matrix1(j,i),i=1,9),j=1,9)/
@@ -162,16 +167,14 @@ c   here we evaluate the number we use
      *	-0.059683104d0,	-0.084404655d0,	0.084404655d0,	0.0d0,	
      * 0.099471839d0,	0.0d0,	0.0d0,	-0.039788736d0/
    
-                        
-            xlab=xmev
-            ylab=ymev
+                     
             dwn=1.0d0/mass
             wnq=mass*mass
             wn3=mass*mass*mass
             dwnq=dwn*dwn
 
-            x=xlab*dwn
-            y=ylab*dwn
+            x=xmev*dwn
+            y=ymev*dwn
             x2=x*x
             y2=y*y
 c    the initial of contact parameters:if parlsj is .true.,using 
@@ -232,7 +235,7 @@ c function:normk,normq,qdotk,kcrossq2,wfunc,lfunc,afunc
             
             use paravari
             private pi,ga,mpi,mpi0,mpipm,mass,fpi,tidelambda,
-     +       c1,c2,c3,c4,xlab,ylab,x,y,dwn,wnq,wn3,dwnq,x2,y2,c
+     +       c1,c2,c3,c4,x,y,dwn,wnq,wn3,dwnq,x2,y2,c
 c this module contains general functions will be used in
 c potential subroutine
          contains
@@ -700,11 +703,11 @@ c   this function calculate the cutoff
 c   lambda is cutoff energy ,n adjust the sharp degree 
 
         function cutoff(lambda,n)
+         use potential_global,only:xmev,ymev
         implicit real*8 (a-h,o-z)
         real*8 lambda,t,expo
         real*8 cutoff
         integer n
-        common /cpot/ v(6),xmev,ymev 
         t=dfloat(n)
         expo=(xmev/lambda)**(2.0d0*t)+(ymev/lambda)**(2.0d0*t)
         cutoff=dexp(-expo)  

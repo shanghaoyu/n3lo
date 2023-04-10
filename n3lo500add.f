@@ -41,6 +41,7 @@ c
 c
 c
 c
+      use potential_global
       implicit real*8 (a-h,o-z)
 c
 c
@@ -48,7 +49,6 @@ c
 c
 c        arguments and values of this subroutine
 c
-      common /cpot/   v(6),xmev,ymev
       common /cstate/ j,heform,sing,trip,coup,endep,label
       common /cnn/ inn
 c

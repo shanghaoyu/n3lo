@@ -36,6 +36,7 @@ c                d-5300 bonn, w. germany
 cgset需要用bonn package中的（是直接连接上还是重写是个问题），都行，可以先把bonn也放下去
 cpot 是potential的简称，下面用external声明pot是个函数，所以如果不用bonn势call n3lo就行
       use phasecal
+      use potential_global
       implicit real*8 (a-h,o-z)
       external pot
       real*8 elab(41)
@@ -50,7 +51,6 @@ c
 c        arguments of the potential subroutine pot being called in this
 c        program
 c
-      common /cpot/   v(6),xmev,ymev
       common /cstate/ j,heform,sing,trip,coup,endep,label
 c        xmev and ymev are the final and initial relative momenta,
 c        respectively, in units of mev.
