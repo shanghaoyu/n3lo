@@ -62,9 +62,10 @@ c      this subroutine should been used in the main programm
       module potential_global
 c     this module contains the global variable of the subroutine potential
 
-c     variables:v(6),xmev,ymev
+c     variables:v(6),xmev,ymev,conta(24)
 c     input
       real*8 v(6),xmev,ymev
+      real*8 conta(24)
              
       end module
       module paravari
@@ -85,9 +86,7 @@ cas it contains the variables often been used
             implicit real*8 (a-h,o-z)
             real*8 matrix1(9,9),matrix2(15,15)
             real*8 t(24)
-            logical :: parlsj=.true.
-            real*8 conta(24)            
-            common /con/ conta
+            logical :: parlsj=.true.          
             data((matrix1(j,i),i=1,9),j=1,9)/
      1 0.0198943d0,       0.0d0,       0.0d0,       0.0d0,        0.0d0,
      * 0.0596831d0,       0.0d0,       0.0d0,       0.0d0,

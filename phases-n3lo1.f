@@ -41,10 +41,8 @@ cpot 是potential的简称，下面用external声明pot是个函数，所以如�
       external pot
       real*8 elab(41)
       real*8 cutoff
-      real*8 conta(24)
       common /alpha/ melab
       common /einject/ elab
-      common /con/ conta
       common /cut/ cutoff
       common /crdwrt/ kread,kwrite,kpunch,kda(9)
 c
