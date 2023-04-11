@@ -1664,7 +1664,7 @@ c        ----------
 c
 c
       data ((tab(i,j),i=1,5),j=1,99)/
-     1    6.000000000d0,   0.0d0,    4.0000d0,  500.0d0,   0.0d0,
+     1    6.000000000d0,   0.0d0,    2.0000d0,  500.0d0,   0.0d0,
      2   -1.290000000d0,  92.4d0,  134.9766d0,    0.0d0,   0.0d0,
      3    0.000000000d0,   0.0d0,    0.0000d0,    0.0d0,   0.0d0,
      4    0.000000000d0,   0.0d0,    0.0000d0,    0.0d0,   0.0d0,
@@ -1750,32 +1750,32 @@ c
      4    1.000000000d0,   0.0d0,  138.0390d0,    0.0d0,  -1.0d0,
      5   39.000000000d0,   0.0d0,    0.0000d0,    0.0d0,   0.0d0,
      6    0.000000000d0,   0.0d0,    2.0000d0,  500.0d0,   0.0d0,
-     7   -0.139562930d0,   3.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     8    2.417201616d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     9   -2.332142565d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     *  -16.737482775d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     1    1.184990880d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     2    4.989911864d0,   3.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     3    0.187002997d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     4    9.976039933d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     5   -0.819122188d0,   3.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     6    4.812595281d0,   3.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     7   -0.159635365d0,   3.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     8    0.823265695d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     9   -4.319199809d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0/
+     7   -0.0d0,   3.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     8    0.0d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     9   -0.0d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     *  -0.0d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     1    0.00d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     2    0.0d0,   3.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     3    0.00d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     4    0.0d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     5   0.0d0,   3.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     6    0.0d0,   3.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     7   0.0d0,   3.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     8    0.0d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     9   0.0d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0/
 c
       data ((tab(i,j),i=1,5),j=100,122)/
-     *  -19.171052868d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     1   -5.590348190d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     2    0.502604767d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     3    1.162495137d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     4    1.759338786d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     5   -1.946384037d0,   3.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     6   -3.200942439d0,   3.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     7   -0.757935632d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     8    6.023854940d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     9    0.010519022d0,   4.0d0,  500.0000d0,    0.0d0,   0.0d0,
-     *   -1.333660200d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     *  0.0d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     1   0.0d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     2    0.0d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     3    0.0d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     4    0.0d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     5   0.0d0,   3.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     6   -0.0d0,   3.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     7   -0.0d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     8    0.0d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     9    0.0d0,   4.0d0,  500.0000d0,    0.0d0,   0.0d0,
+     *   0.0d0,   2.0d0,  500.0000d0,    0.0d0,   0.0d0,
      1    0.000000000d0,   0.0d0,    0.0000d0,    0.0d0,   0.0d0,
      2    0.000000000d0,   0.0d0,    0.0000d0,    0.0d0,   0.0d0,
      3    0.000000000d0,   0.0d0,    0.0000d0,    0.0d0,   0.0d0,
@@ -1810,7 +1810,7 @@ c
 c
 c
       data t1s0np/
-     7   -0.13956293d0,  3.0d0,  500.0000d0,    0.0d0,   0.0d0/
+     7   -0.0d0,  3.0d0,  500.0000d0,    0.0d0,   0.0d0/
 c
 c
       data t1s0nn/
@@ -1986,10 +1986,10 @@ c
 c        fix the LECs of the pi-N Lagrangian
 c
 c        the c_i LECs
-      cc(1)=-1.07d0
-      cc(2)=3.20d0
-      cc(3)=-5.32d0
-      cc(4)=3.56d0
+      cc(1)=-0.74d0
+      cc(2)=0.0d0
+      cc(3)=-3.61d0
+      cc(4)=2.44d0
 c**** write (kwrite,10021) name,cc
       cb1a(inter)=cc(1)*wn*1.d-3
       cb2a(inter)=cc(2)*wn*1.d-3
@@ -5158,7 +5158,7 @@ c
  1900 if (.not.indla.or.cc4.ne.c4) go to 20
       c5=c(mm,im)
       do 1905 i=1,nt
- 1905 aa(i)=aa(i)*c5*cpaa(i)
+ 1905 aa(i)=0.0d0!aa(i)*c5*cpaa(i)
       mi=mi+1
       mm=mm+1
       go to 5999
@@ -5175,7 +5175,7 @@ c
       do 2005 i=1,nt
       akk=-deltaq(i,1)
       radi=4.d0*c4+akk
- 2005 aa(i)=aa(i)*c5*radi*cpa(i)
+ 2005 aa(i)=0.0d0!aa(i)*c5*radi*cpa(i)
       mi=mi+1
       mm=mm+1
       go to 5999
@@ -5316,7 +5316,7 @@ c
       radi=4.d0*c4+akk
       brak=(cb2*radi/6.d0+cb3*(2.d0*c4+akk)-4.d0*cb1*c4)**2
      1    +(cb2*radi)**2/45.d0
- 3005 aa(i)=aa(i)*c5*ell(i)*brak
+ 3005 aa(i)=0.0d0!aa(i)*c5*ell(i)*brak
       mi=mi+1
       mm=mm+1
       go to 5999
@@ -5333,7 +5333,7 @@ c
       do 3105 i=1,nt
       akk=-deltaq(i,1)
       radi=4.d0*c4+akk
- 3105 aa(i)=aa(i)*c5*ell(i)*radi
+ 3105 aa(i)=0.0d0!aa(i)*c5*ell(i)*radi
       mi=mi+1
       mm=mm+1
       go to 5999
@@ -5399,7 +5399,7 @@ c
       akk=-deltaq(i,1)
       radi=4.d0*c4+akk
       brak=radi+ga2*(8.d0*c4+5.d0*akk)
- 3605 aa(i)=aa(i)*c5*ell(i)*brak
+ 3605 aa(i)=0.0d0!aa(i)*c5*ell(i)*brak
       mi=mi+1
       mm=mm+1
       go to 5999
@@ -5417,7 +5417,7 @@ c
       akk=-deltaq(i,1)
       radi=4.d0*c4+akk
       brak=radi-ga2*(16.d0*c4+7.d0*akk)
- 3705 aa(i)=aa(i)*c5*ell(i)*brak
+ 3705 aa(i)=0.0d0!aa(i)*c5*ell(i)*brak
       mi=mi+1
       mm=mm+1
       go to 5999
@@ -5434,7 +5434,7 @@ c
       do 3805 i=1,nt
       akk=-deltaq(i,1)
       radi=4.d0*c4+akk
- 3805 aa(i)=aa(i)*c5*ell(i)*radi
+ 3805 aa(i)=0.0d0!aa(i)*c5*ell(i)*radi
       mi=mi+1
       mm=mm+1
       go to 5999
@@ -5455,7 +5455,7 @@ c
      1     +4.d0*(6.d0*cb1+cb2-3.d0*cb3)*akk*c4
      2     +6.d0*(cb2-2.d0*cb3)*c4*c4
      3     +24.d0*(2.d0*cb1+cb3)*c4*c4*c4/radi
- 3905 aa(i)=aa(i)*c5*ell(i)*brak
+ 3905 aa(i)=0.0d0!aa(i)*c5*ell(i)*brak
       mi=mi+1
       mm=mm+1
       go to 5999
@@ -5499,7 +5499,7 @@ c           integrate over mu in [2m_pi, +infinity], and store result in aintmu
      1                  (amu4(ii)*amu(ii)*(amu2(ii)+aakk))
  4015       continue
 c
-            aa(i)=aa(i)*c5*aintmu
+            aa(i)=0.0d0!aa(i)*c5*aintmu
  4005 continue
 c
       mi=mi+1
@@ -5543,7 +5543,7 @@ c           integrate over mu in [2m_pi, +infinity], and store result in aintmu
      1                  (amu4(ii)*amu(ii)*(amu2(ii)+aakk))
  4115       continue
 c
-            aa(i)=aa(i)*c5*aintmu
+            aa(i)=0.0d0!aa(i)*c5*aintmu
  4105 continue
 c
       mi=mi+1
@@ -5586,7 +5586,7 @@ c           integrate over mu in [2m_pi, +infinity], and store result in aintmu
      1                  (amu4(ii)*amu(ii)*(amu2(ii)+aakk))
  4215       continue
 c
-            aa(i)=aa(i)*c5*aintmu
+            aa(i)=0.0d0!aa(i)*c5*aintmu
  4205 continue
 c
       mi=mi+1
@@ -5641,7 +5641,7 @@ c           integrate over mu in [2m_pi, +infinity], and store result in aintmu
      1                  (amu4(ii)*amu(ii)*(amu2(ii)+aakk))
  4315       continue
 c
-            aa(i)=aa(i)*c5*aintmu
+            aa(i)=0.0d0!aa(i)*c5*aintmu
  4305 continue
 c 
       mi=mi+1
@@ -5726,7 +5726,7 @@ c
  4415       continue
 c
             aintmu=aintmua+aintmub
-            aa(i)=aa(i)*c5*aintmu
+            aa(i)=0.0d0!aa(i)*c5*aintmu
  4405 continue
 c
       mi=mi+2
@@ -5807,7 +5807,7 @@ c
      2                  /(amu6(ii)*(amu2(ii)+aakk))
  4515       continue
 c
-            aa(i)=aa(i)*c5*aintmu
+            aa(i)=0.0d0!aa(i)*c5*aintmu
  4505 continue
 c
       mi=mi+2
@@ -7265,8 +7265,8 @@ c           aakk = q^2
             aakk=-deltaq(i,1)
             omega2 = 4.d0*c4 + aakk
 c
-            aa(i)=aa(i) * c5 *
-     1   (  wpi5/2.d0/omega2 + (2.d0*c4 + aakk)*(aakk - c4)*cpa(i) )
+            aa(i)=0.0d0!aa(i) * c5 *
+c     1   (  wpi5/2.d0/omega2 + (2.d0*c4 + aakk)*(aakk - c4)*cpa(i) )
 28105 continue
 c
       mi=mi+1
@@ -7296,10 +7296,10 @@ c           aakk = q^2
             aakk=-deltaq(i,1)
             omega2 = 4.d0*c4 + aakk
 c
-            aa(i)=aa(i) * c5 *
-     1   (  3.d0*ga2*wpi5/2.d0/omega2 + 
-     2            (ga2*(3.d0*c4 + 2.d0*aakk) - 2.d0*c4 - aakk)*
-     3            (2.d0*c4 + aakk)*cpa(i)      )
+            aa(i)=0.0d0!aa(i) * c5 *
+c     1   (  3.d0*ga2*wpi5/2.d0/omega2 + 
+c     2            (ga2*(3.d0*c4 + 2.d0*aakk) - 2.d0*c4 - aakk)*
+c     3            (2.d0*c4 + aakk)*cpa(i)      )
 28205 continue
 c
       mi=mi+1
@@ -7327,7 +7327,7 @@ c     iterate over output points aa(i), store results in them
 c           aakk = q^2 
             aakk=-deltaq(i,1)
 c
-            aa(i)=aa(i) * c5 * (5.d0*c4 + 2.d0*aakk)*cpa(i)
+            aa(i)=0.0d0!aa(i) * c5 * (5.d0*c4 + 2.d0*aakk)*cpa(i)
 28305 continue
 c
       mi=mi+1
@@ -7356,8 +7356,8 @@ c           aakk = q^2
             aakk=-deltaq(i,1)
             omega2 = 4.d0*c4 + aakk
 c
-            aa(i)=aa(i) * c5 * 
-     1            (ga2*(3.d0*c4 + aakk) - omega2)*cpa(i)
+            aa(i)=0.0d0!aa(i) * c5 * 
+c     1            (ga2*(3.d0*c4 + aakk) - omega2)*cpa(i)
 28405 continue
 c
       mi=mi+1
