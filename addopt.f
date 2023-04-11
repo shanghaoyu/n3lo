@@ -5,6 +5,7 @@ c    in lsj representation)
 c    version three: 2023.3.29. LO
 c    version four: 2023.4.6 NLO 
 c    version five:2023.4.7 N2LO
+c    version six:2023.4.10 N2LO rebulid codes
 c
 c***********************************************************************
 c    
@@ -559,7 +560,125 @@ c   nlo vt
           end if
           return
           end function
-      end module   
+      end module 
+      
+      module typedef
+         type velement
+         real ::vc(6)
+         real ::wc(6)
+         real ::vss(6)
+         real ::wss(6)
+         real ::vt(6)
+         real ::wt(6)
+         real ::vls(6)
+         real ::wls(6)
+         real ::vsum(6)
+         end type
+      end module
+
+      module n3lopot
+         use typedef
+         use const
+         use genfunc
+
+         implicit none 
+         private
+
+c     the interface
+c     variable
+         public n3lo 
+c     function
+         public n3lo_vc_fd,n3lo_wt_fd,n3lo_ws_fd 
+         public n3lo_vc_rc,n3lo_wc_rc,n3lo_vt_rc,n3lo_wt_rc,
+     +    n3lo_vs_rc,n3lo_ws_rc,n3lo_vls_rc,n3lo_wls_rc    
+         
+         
+         type(velement) ::n3lo
+
+         contains
+c     football diagram(the 'fd')
+         real*8 function n3lo_vc_fd(z)
+         real*8 z
+      n3lo_vc_fd=3.0d0/(16.0d0*pi**2*fpi**4)*((c2/6.0d0*wfunc(z)**2
+     +   +c3*(2.0d0*mpi**2+normq(z)**2)-4.0d0*c1*mpi**2)**2+c2**2
+     +   /45.0d0*wfunc(z)**4)*lfunc(z)
+        return
+        end function
+
+        real*8 function n3lo_wt_fd(z)
+        real*8 z
+        n3lo_wt_fd=-ga**2/(32.0d0*pi*fpi**4)*c4*wfunc(z)**2*afunc(z)
+        return
+      end function
+
+        real*8 function n3lo_ws_fd(z)
+        real*8 z
+        n3lo_ws_fd=-normq(z)**2*n3lo_wt_fd(z)
+        return
+        end function
+c     relativistic corrections(the 'rc')
+        
+        real*8 function n3lo_vc_rc(z)
+        real*8 z
+        n3lo_vc_rc=3.0d0*ga**4/(128.0d0*pi*fpi**4)
+     +  *(mpi**5/(2.0d0*wfunc(z)**2)+(2.0d0*mpi**2
+     +  +normq(z)**2)*(normq(z)**2-mpi**2)*afunc(z))
+        return
+      end function
+      
+        real*8 function n3lo_wc_rc(z)
+        real*8 z
+        n3lo_wc_rc=ga**2/(64.0d0*pi*fpi**4)*(3*ga**2
+     +  *mpi**5/(2.0d0*wfunc(z)**2)+(ga**2*(3.0d0*mpi**2
+     + +2.0d0*normq(z)**2)-2.0d0*mpi**2-normq(z)**2)
+     +  *(2.0d0*mpi**2+normq(z)**2)*afunc(z))
+        return
+       end function
+      
+        real*8 function n3lo_vt_rc(z)
+        real*8 z
+        n3lo_vt_rc=3.0d0*ga**4/(256.0d0*pi*fpi**4)
+     +   *(5.0d0*mpi**2+2.0d0*normq(z)**2)*afunc(z)
+        return
+      end function
+
+        real*8 function n3lo_wt_rc(z)
+        real*8 z
+        n3lo_wt_rc=ga**2/(128.0d0*pi*fpi**4)
+     +  *(ga**2*(3.0d0*mpi**2+normq(z)**2)-wfunc(z)**2)
+     +  *afunc(z)
+        return 
+        end function
+
+        real*8 function n3lo_vs_rc(z)
+        real*8 z
+        n3lo_vs_rc=-normq(z)**2*n3lo_vt_rc(z)
+        return
+      end function
+
+        real*8 function n3lo_ws_rc(z)
+        real*8 z
+        n3lo_ws_rc=-normq(z)**2*n3lo_wt_rc(z)
+        return
+        end function
+
+        real*8 function n3lo_vls_rc(z)
+        real*8 z
+        n3lo_vls_rc=3.0d0*ga**4/(32.0d0*pi*fpi**4)
+     +  *(2.0d0*mpi**2+normq(z)**2)*afunc(z)
+        return
+      end function
+
+        real*8 function n3lo_wls_rc(z)
+        real*8 z
+        n3lo_wls_rc=ga**2*(1.0d0-ga**2)/(32.0d0*pi*
+     +   fpi**4)*wfunc(z)**2*afunc(z)
+        return
+       end function
+
+      end module
+
+      
 
 
 c   we write another legendre 
@@ -599,11 +718,12 @@ c        compute legendre polynom for j greater or equal two
 c
 c
 c
-        do 2 i=2,j
+        do i=2,j
         a=x*legendre
         b=a-legendrem1
         legendrem1=legendre
-    2 legendre=-b/dfloat(i)+b+a
+        legendre=-b/dfloat(i)+b+a
+        end do
 c
 
         return
@@ -676,12 +796,14 @@ c   now we just set the ct and wt
         data x(273)/0.016276744849602d0/, a(273)/0.032550614492363d0/
         wt=0.0d0 
         ct=0.0d0
-        do 3 i=1,48
+        do  i=1,48
         wt(i)=a(225+i)   
-    3   ct(i)=-x(225+i)
-        do 4 i=96,49,-1
+        ct(i)=-x(225+i)
+        end do
+        do  i=96,49,-1
         ct(i)=-ct(97-i)
-    4   wt(i)=wt(97-i)
+        wt(i)=wt(97-i)
+        end do
         pj=0.0d0
         alj=0.0d0
         pi=3.141592653589793d0
@@ -692,13 +814,14 @@ c   now we set 96
 c   ct,wt  gauss zero and weight
             
 c   set the jth legendre value 
-        do 1 i=1,96
-    1   pj(i)=legendre(ct(i),j)
+        do  i=1,96
+        pj(i)=legendre(ct(i),j)
+        end do
         
 c   calculate the integration
-        do 2 i=1,96
-    2   alj=alj+wt(i)*pj(i)*(ct(i)**l)*func(ct(i))*pi
-
+        do  i=1,96
+        alj=alj+wt(i)*pj(i)*(ct(i)**l)*func(ct(i))*pi
+        end do
         return
         end
 
@@ -716,14 +839,17 @@ c   lambda is cutoff energy ,n adjust the sharp degree
         cutoff=dexp(-expo)  
         end
 
-c   this subroutine calculate lsj decomposition
-c   we use pot(6) to record them
-c   0v(singlet), 1v(uncoupled triplet), v++, v--, v+-, v-+ (coupled)
 
+        module decompose
+c   this module calculate lsj decomposition
+c   we use pot(6) to record them
+c   0v(singlet), 1v(uncoupled triplet), v++, v--, v+-, v-+ (coupled) 
+         implicit none
+c   all the subroutines are public                 
+
+         contains
       subroutine lsjvcentral(pot,vcentral,j)
-c        you should make sure that the initial subroutine 
-c        has been called once
-                
+
 c        input         
          real*8,external :: vcentral
          integer j
@@ -747,9 +873,7 @@ c        local
         end   
 
         subroutine lsjvspinspin(pot,vspinspin,j)
-c        you should make sure that the initial subroutine 
-c        has been called once
-                   
+
 c        input         
          real*8,external :: vspinspin
          integer j
@@ -757,7 +881,8 @@ c        output
          real*8 pot(6)
 c        local
          real*8,external :: alj
-         
+
+         pot=0.0d0        
          if (j .eq. 0)then
             pot(1)=-6.0d0*alj(vspinspin,0,j)
             pot(3)=2.0d0*alj(vspinspin,0,j+1)
@@ -772,9 +897,7 @@ c        local
         end   
        
       subroutine lsjvtensor(pot,vtensor,j)
-c        you should make sure that the initial subroutine 
-c        has been called once
-   
+
 c        global(x,y)
          use paravari,only:x,y,x2,y2
                 
@@ -812,6 +935,40 @@ c        local
      1  +x2*alj(vtensor,0,j+1)-2.0d0*x*y*alj(vtensor,0,j) )
         end if 
         end 
+
+        subroutine lsjvspinobit(pot,vspinobit,j)
+c        global(x,y)
+         use paravari,only:x,y
+                
+c        input         
+         real*8,external :: vspinobit
+         integer j
+c        output
+         real*8 pot(6)
+c        local
+         real*8,external :: alj
+         real*8 jd,jdp1,jd2p1
+         
+         pot=0.0d0
+         jd=dfloat(j)
+         jdp1=jd+1.0d0
+         jd2p1=2.0d0*jd+1.0d0
+        if (j .eq. 0) then
+        pot(1)=pot(1)+0.0d0
+        pot(3)=pot(3)+2.0d0*x*y*(jd+2.0d0)/(2.0d0*jd+3.0d0)
+     1  *(alj(vspinobit,0,j+2)-alj(vspinobit,0,j))
+        else
+        pot(1)=pot(1)+0.0d0
+        pot(2)=pot(2)+2.0d0*x*y/jd2p1*(alj(vspinobit,0,j+1)
+     1  -alj(vspinobit,0,j-1))
+        pot(3)=pot(3)+2.0d0*x*y*(jd+2.0d0)/(2.0d0*jd+3.0d0)
+     1  *(alj(vspinobit,0,j+2)-alj(vspinobit,0,j))
+        pot(4)=pot(4)+2.0d0*x*y*(jd-1.0d0)/(2.0d0*jd-1.0d0)
+     1  *(alj(vspinobit,0,j-2)-alj(vspinobit,0,j))
+        pot(5)=pot(5)+0.0d0
+        pot(6)=pot(6)+0.0d0
+        end if
+       end subroutine
         
         subroutine isospindependent(pot1,j,pot2)
 c       this subroutine contains the tau1 dot tau2 terms factor
@@ -822,6 +979,7 @@ c       input
 
 c       output
          real*8 pot2(6)
+         pot2=0.0d0
          if (mod(j,2).eq.0)then
             pot2(1)=pot1(1)
             pot2(2)=-3.0d0*pot1(2)
@@ -832,10 +990,12 @@ c       output
             pot2(3:6)=-3.0d0*pot1(3:6)
          end if                
          end
-
+      end module
         subroutine lsjdecomposition(pot,j)
         use addterms
         use potential_global,only:lambda
+        use n3lopot
+        use decompose
         implicit real*8 (a-h,o-z)
         real*8 pot(6),jd,jdp1,jd2p1,temp1(6),temp2(6),vcct(6)
         real*8 nlowcel(6),nlovtel(6)
@@ -871,23 +1031,8 @@ c   spin-spin force part
        pot=pot+n2lowsel   
 
 c   spin-obit force part
-     
-        if (j .eq. 0) then
-        pot(1)=pot(1)+0.0d0
-        pot(3)=pot(3)+2.0d0*x*y*(jd+2.0d0)/(2.0d0*jd+3.0d0)
-     1  *(alj(vspinobit,0,j+2)-alj(vspinobit,0,j))
-        else
-        pot(1)=pot(1)+0.0d0
-        pot(2)=pot(2)+2.0d0*x*y/jd2p1*(alj(vspinobit,0,j+1)
-     1  -alj(vspinobit,0,j-1))
-        pot(3)=pot(3)+2.0d0*x*y*(jd+2.0d0)/(2.0d0*jd+3.0d0)
-     1  *(alj(vspinobit,0,j+2)-alj(vspinobit,0,j))
-        pot(4)=pot(4)+2.0d0*x*y*(jd-1.0d0)/(2.0d0*jd-1.0d0)
-     1  *(alj(vspinobit,0,j-2)-alj(vspinobit,0,j))
-        pot(5)=pot(5)+0.0d0
-        pot(6)=pot(6)+0.0d0
-        end if
-
+       call lsjvspinobit(temp1,vspinobit,j)
+       pot=pot+temp1
 c   sigmaL force part
         
         if (j .eq. 0) then
@@ -959,8 +1104,9 @@ c   sigmak force part
         ey=dsqrt(1.0d0+y*y)
         ree=dsqrt(ex*ey)
         expexp=cutoff(lambda,2) 
-        do 1 i=1,6
-    1   pot(i)=pot(i)*expexp
+        do  i=1,6
+        pot(i)=pot(i)*expexp
+        end do
         do i=1,6
         pot(i)=pot(i)/(2.0d0*pi)**3*dwnq/ree
         end do
