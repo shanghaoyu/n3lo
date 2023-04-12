@@ -1997,10 +1997,10 @@ c**** write (kwrite,10021) name,cc
       cb4a(inter)=cc(4)*wn*1.d-3
 c
 c        the d_i LECs
-      cc(1)=1.04d0
-      cc(2)=-0.48d0
-      cc(3)=0.14d0
-      cc(4)=-1.90d0
+      cc(1)=0.0d0
+      cc(2)=-0.0d0
+      cc(3)=0.0d0
+      cc(4)=-0.0d0
 c**** write (kwrite,10021) name,cc
       cd12a(inter)=cc(1)*wnq*1.d-6
       cd3a(inter)=cc(2)*wnq*1.d-6
@@ -5003,7 +5003,7 @@ c
       aaa=-(1.d0-betaq)**2/(2.d0*betaq*betaq)*dlog(betaq1)
      1    +betaq1/(2.d0*betaq)
      2    -2.d0*c5
- 1055 aa(i)=aa(i)*aaa
+ 1055 aa(i)=0.0d0!aa(i)*aaa
       mi=mi+2
       mm=mm+1
       go to 5999
