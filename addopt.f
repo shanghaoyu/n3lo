@@ -627,7 +627,7 @@ c     football diagram(the 'fd')
 
         real*8 function n3lo_wt_fd(z)
         real*8 z
-        n3lo_wt_fd=-ga**2/(32.0d0*pi*fpi**4)*c4*wfunc(z)**2*afunc(z)
+        n3lo_wt_fd=c4**2/(96.0d0*pi**2*fpi**4)*wfunc(z)**2*lfunc(z)
         return
       end function
 
@@ -1201,6 +1201,13 @@ c        pot=pot+temp2
         pot=pot+n3lo_rc%wls
         call lsjvcentral(n3lo_fd%vc,n3lo_vc_fd,j)
         pot=pot+n3lo_fd%vc
+        call lsjvtensor(temp1,n3lo_wt_fd,j)
+        call isospindependent(temp1,j,n3lo_fd%wt)
+        pot=pot+n3lo_fd%wt
+        call lsjvspinspin(temp1,n3lo_ws_fd,j)
+        call isospindependent(temp1,j,n3lo_fd%wss)
+        pot=pot+n3lo_fd%wss
+
                 
         ex=dsqrt(1.0d0+x*x)
         ey=dsqrt(1.0d0+y*y)
