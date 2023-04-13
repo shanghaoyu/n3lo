@@ -1190,6 +1190,12 @@ c        pot=pot+temp2
         call lsjvcentral(temp1,n3lo_wc_rc,j)
         call isospindependent(temp1,j,n3lo_rc%wc)
         pot=pot+n3lo_rc%wc
+        call lsjvtensor(temp1,n3lo_wt_rc,j)
+        call isospindependent(temp1,j,n3lo_rc%wt)
+        pot=pot+n3lo_rc%wt
+        call lsjvspinspin(temp1,n3lo_ws_rc,j)
+        call isospindependent(temp1,j,n3lo_rc%wss)
+        pot=pot+n3lo_rc%wss
         call lsjvcentral(n3lo_fd%vc,n3lo_vc_fd,j)
 c        pot=pot+n3lo_fd%vc
                 
