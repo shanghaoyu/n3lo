@@ -603,16 +603,18 @@ c   nlo vt
 
 c     the interface
 c     variable
-         public n3lo_fd,n3lo_rc
+         public n3lo_fd,n3lo_rc,n3lo_tl
 c     function
          public n3lo_vc_fd,n3lo_wt_fd,n3lo_ws_fd 
          public n3lo_vc_rc,n3lo_wc_rc,n3lo_vt_rc,n3lo_wt_rc,
      +    n3lo_vs_rc,n3lo_ws_rc,n3lo_vls_rc,n3lo_wls_rc
+         public n3lo_vc_tl
          public  pi_gamma  
 c     subroutine         
          
          type(velement) ::n3lo_fd
          type(velement) ::n3lo_rc
+         type(velement) ::n3lo_tl
 
          contains
 
@@ -708,8 +710,20 @@ c     spectral functions,name as n3lo_imv(mu)
       end function
 
 c     two loop contributions(tl)
-c        real*8 function n3lo_vc_tl(z)
-c        real*8 z
+        real*8 function n3lo_vc_tl(z)
+        real*8 z
+        real*8,external :: gauss_integral
+        n3lo_vc_tl=-2.0d0*normq(z)**6/pi
+     +   *gauss_integral(integrand,2.0d0*mpi,tidelambda)
+        return
+        contains
+        real*8 function integrand(mu)
+c     z is the constant in this function        
+        real*8 mu
+        integrand=n3lo_imvc(mu)/(mu**5*(mu**2+normq(z)**2))
+        return
+         end function
+      end function 
 
 
 
@@ -1212,6 +1226,7 @@ c        pot=pot+temp1
 c        pot=pot+temp2
         call n3lo_rc%init
         call n3lo_fd%init
+        call n3lo_tl%init
         call lsjvcentral(n3lo_rc%vc,n3lo_vc_rc,j)
         pot=pot+n3lo_rc%vc
         call lsjvtensor(n3lo_rc%vt,n3lo_vt_rc,j)
@@ -1240,6 +1255,8 @@ c        pot=pot+temp2
         call lsjvspinspin(temp1,n3lo_ws_fd,j)
         call isospindependent(temp1,j,n3lo_fd%wss)
         pot=pot+n3lo_fd%wss
+c        call lsjvcentral(n3lo_tl%vc,n3lo_vc_tl,j)
+c        pot=pot+n3lo_tl%vc
 
                 
         ex=dsqrt(1.0d0+x*x)
