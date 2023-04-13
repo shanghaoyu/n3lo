@@ -1181,6 +1181,10 @@ c        pot=pot+temp2
         call n3lo_fd%init
         call lsjvcentral(n3lo_rc%vc,n3lo_vc_rc,j)
         pot=pot+n3lo_rc%vc
+        call lsjvtensor(n3lo_rc%vt,n3lo_vt_rc,j)
+        pot=pot+n3lo_rc%vt
+        call lsjvspinspin(n3lo_rc%vss,n3lo_vs_rc,j)
+        pot=pot+n3lo_rc%vss
         call lsjvcentral(n3lo_fd%vc,n3lo_vc_fd,j)
 c        pot=pot+n3lo_fd%vc
                 
