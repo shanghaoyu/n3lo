@@ -696,6 +696,23 @@ c     relativistic corrections(the 'rc')
         return
        end function
 
+c     spectral functions,name as n3lo_imv(mu)
+      
+        real*8 function n3lo_imvc(mu)
+        real*8 mu
+        n3lo_imvc=3*ga**4*(2.0d0*mpi**2-mu**2)/(pi*mu
+     +  *(4.0d0*fpi)**6)*((mpi**2-2.0d0*mu**2)*(2.0d0*mpi
+     +  +(2.0d0*mpi**2-mu**2)/(2.0d0*mu)*dlog((mu+2.0d0*mpi)
+     + /(mu-2.0d0*mpi)))+4.0d0*ga**2*mpi*(2.0d0*mpi**2-mu**2))
+        return
+      end function
+
+c     two loop contributions(tl)
+c        real*8 function n3lo_vc_tl(z)
+c        real*8 z
+
+
+
 c    pi-gamma (charge dependent) (wt)
         real*8 function pi_gamma(z)
         real*8 z
@@ -766,17 +783,58 @@ c   momentum and j is total angular momentum,func is the function
 c   being integrated
 
 c   ALJ^J(q',q)=pi*INTEGRATE[fuc(q',q,z) z^l P_J(z)，-1,1]
-
-        implicit real*8 (a-h,o-z)
+        implicit none
+c    input        
         real*8,external :: func
         real*8,external :: legendre
-        external gset
-        integer l,j
-        real*8 ct(96),wt(96),pj(96),pi,x(273),a(273)
-        real*8 alj
-        
+        real*8,external :: gauss_integral
+        integer :: l,j
+c    output        
+        real*8 :: alj
+c    local
+        real*8 :: pi       
 
-c   now we just set the ct and wt 
+        alj=0.0d0
+        pi=3.141592653589793d0
+        alj=gauss_integral(integrand,-1.0d0,1.0d0)
+        return
+        contains
+c   define the integrand        
+        function integrand(z)
+         implicit none
+         real*8 ::z
+         real*8 ::integrand
+         integrand=legendre(z,j)*func(z)*z**l*pi
+         return
+        end function
+        end
+
+c   this function calculate the cutoff
+c   lambda is cutoff energy ,n adjust the sharp degree 
+
+        function cutoff(lambda,n)
+         use potential_global,only:xmev,ymev
+        implicit real*8 (a-h,o-z)
+        real*8 lambda,t,expo
+        real*8 cutoff
+        integer n
+        t=dfloat(n)
+        expo=(xmev/lambda)**(2.0d0*t)+(ymev/lambda)**(2.0d0*t)
+        cutoff=dexp(-expo)  
+        end
+
+        function gauss_integral(func,xlb,xub)
+c     input  
+        real*8,external :: func
+c       the integrate low bound and up bound        
+        real*8 ::xlb,xub
+
+c     output
+        real*8 ::gauss_integral
+
+c     local
+        real*8 ::ct(96),wt(96),x(273),a(273)
+        integer :: i
         data x(226)/0.999689503883230d0/, a(226)/0.000796792065552d0/
         data x(227)/0.998364375863181d0/, a(227)/0.001853960788946d0/
         data x(228)/0.995981842987209d0/, a(228)/0.002910731817934d0/
@@ -827,6 +885,7 @@ c   now we just set the ct and wt
         data x(273)/0.016276744849602d0/, a(273)/0.032550614492363d0/
         wt=0.0d0 
         ct=0.0d0
+        gauss_integral=0.0d0
         do  i=1,48
         wt(i)=a(225+i)   
         ct(i)=-x(225+i)
@@ -835,41 +894,15 @@ c   now we just set the ct and wt
         ct(i)=-ct(97-i)
         wt(i)=wt(97-i)
         end do
-        pj=0.0d0
-        alj=0.0d0
-        pi=3.141592653589793d0
-c   determine the number of gauss points we use 
-        
-c   now we set 96
-!        call gset(-1.0d0,1.0d0,16,ct,wt)
-c   ct,wt  gauss zero and weight
-            
-c   set the jth legendre value 
-        do  i=1,96
-        pj(i)=legendre(ct(i),j)
+        do i=1,96
+         ct(i)=xlb+(ct(i)+1.0d0)*(xub-xlb)/2.0d0
         end do
-        
-c   calculate the integration
-        do  i=1,96
-        alj=alj+wt(i)*pj(i)*(ct(i)**l)*func(ct(i))*pi
+        do i=1,96
+         gauss_integral=gauss_integral+func(ct(i))*wt(i)
+     +    *(xub-xlb)/2.0d0
         end do
-        return
-        end
-
-c   this function calculate the cutoff
-c   lambda is cutoff energy ,n adjust the sharp degree 
-
-        function cutoff(lambda,n)
-         use potential_global,only:xmev,ymev
-        implicit real*8 (a-h,o-z)
-        real*8 lambda,t,expo
-        real*8 cutoff
-        integer n
-        t=dfloat(n)
-        expo=(xmev/lambda)**(2.0d0*t)+(ymev/lambda)**(2.0d0*t)
-        cutoff=dexp(-expo)  
-        end
-
+        return             
+        end function
 
         module decompose
 c   this module calculate lsj decomposition
