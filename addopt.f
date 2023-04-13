@@ -1187,6 +1187,9 @@ c        pot=pot+temp2
         pot=pot+n3lo_rc%vss
         call lsjvspinobit(n3lo_rc%vls,n3lo_vls_rc,j)
         pot=pot+n3lo_rc%vls
+        call lsjvcentral(temp1,n3lo_wc_rc,j)
+        call isospindependent(temp1,j,n3lo_rc%wc)
+        pot=pot+n3lo_rc%wc
         call lsjvcentral(n3lo_fd%vc,n3lo_vc_fd,j)
 c        pot=pot+n3lo_fd%vc
                 
