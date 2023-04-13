@@ -33,6 +33,7 @@ c    thier variable z means cos(theta)
 c   variable:pi,ga,mpi,mpi0,mpipm,mass,fpi,tidelambda,c1,c2,c3,c4
 c   subroutine :ini_const
 
+         real*8 ::alpha=137.03599976d0
          real*8 ::pi=3.141592653589793d0
          real*8 ::ga=1.29d0
          real*8 ::mpi=138.0390d0
@@ -562,22 +563,38 @@ c   nlo vt
           end function
       end module 
       
-      module typedef
+      module velementm
+         private
+         public velement
          type velement
-         real ::vc(6)
-         real ::wc(6)
-         real ::vss(6)
-         real ::wss(6)
-         real ::vt(6)
-         real ::wt(6)
-         real ::vls(6)
-         real ::wls(6)
-         real ::vsum(6)
+         real*8 ::vc(6)
+         real*8 ::wc(6)
+         real*8 ::vss(6)
+         real*8 ::wss(6)
+         real*8 ::vt(6)
+         real*8 ::wt(6)
+         real*8 ::vls(6)
+         real*8 ::wls(6)
+         contains 
+         procedure :: init => ini_velement
          end type
+         contains
+         subroutine ini_velement(this)
+            class(velement) ::this
+            this%vc=0.0d0
+            this%vls=0.0d0
+            this%vss=0.0d0
+            this%vt=0.0d0
+            this%wc=0.0d0
+            this%wls=0.0d0
+            this%wss=0.0d0
+            this%wt=0.0d0
+            end subroutine
+
       end module
 
       module n3lopot
-         use typedef
+         use velementm
          use const
          use genfunc
 
@@ -586,16 +603,19 @@ c   nlo vt
 
 c     the interface
 c     variable
-         public n3lo 
+         public n3lo_fd,n3lo_rc
 c     function
          public n3lo_vc_fd,n3lo_wt_fd,n3lo_ws_fd 
          public n3lo_vc_rc,n3lo_wc_rc,n3lo_vt_rc,n3lo_wt_rc,
-     +    n3lo_vs_rc,n3lo_ws_rc,n3lo_vls_rc,n3lo_wls_rc    
+     +    n3lo_vs_rc,n3lo_ws_rc,n3lo_vls_rc,n3lo_wls_rc
+         public  pi_gamma  
+c     subroutine         
          
-         
-         type(velement) ::n3lo
+         type(velement) ::n3lo_fd
+         type(velement) ::n3lo_rc
 
          contains
+
 c     football diagram(the 'fd')
          real*8 function n3lo_vc_fd(z)
          real*8 z
@@ -676,6 +696,17 @@ c     relativistic corrections(the 'rc')
         return
        end function
 
+c    pi-gamma (charge dependent) (wt)
+        real*8 function pi_gamma(z)
+        real*8 z
+        real*8 beta
+        beta=normq(z)/mpi
+        pi_gamma=-ga**2/(4.0d0*fpi**2*mpi**2*pi*alpha)
+     +  *(-1.0d0/4.0d0*(1.0d0-beta**2)**2/(2.0d0*beta**4
+     +  *(1.0d0+beta**2))*dlog(1.0d0+beta**2)+1.0d0/
+     +  (2.0d0*beta**2))
+        return
+      end function
       end module
 
       
@@ -969,7 +1000,86 @@ c        local
         pot(6)=pot(6)+0.0d0
         end if
        end subroutine
-        
+
+       subroutine lsjvsigmal(pot,vsigmaL,j)
+c        global(x,y,x2,y2)
+         use paravari,only:x2,y2
+                
+c        input         
+         real*8,external :: vsigmaL
+         integer j
+c        output
+         real*8 pot(6)
+c        local
+         real*8,external :: alj
+         real*8 jd,jdp1,jd2p1
+         
+         pot=0.0d0
+         jd=dfloat(j)
+         jdp1=jd+1.0d0
+         jd2p1=2.0d0*jd+1.0d0
+         if (j .eq. 0) then
+         pot(1)=pot(1)+2.0d0*x2*y2*(alj(vsigmaL,2,j)-alj(vsigmaL,0,j))
+         pot(3)=pot(3)+2.0d0*x2*y2*((2.0d0*jd+3.0d0)/jd2p1
+     1  *alj(vsigmaL,0,j+1)-2.0d0/jd2p1*alj(vsigmaL,1,j)
+     2  -alj(vsigmaL,2,j+1))
+         else
+         pot(1)=pot(1)+2.0d0*x2*y2*(alj(vsigmaL,2,j)-alj(vsigmaL,0,j))
+         pot(2)=pot(2)+2.0d0*x2*y2*(-alj(vsigmaL,0,j)+(jd-1.0d0)/jd2p1
+     1  *alj(vsigmaL,1,j+1)+(jd+2.0d0)/jd2p1*alj(vsigmaL,1,j-1))
+         pot(3)=pot(3)+2.0d0*x2*y2*((2.0d0*jd+3.0d0)/jd2p1
+     1  *alj(vsigmaL,0,j+1)-2.0d0/jd2p1*alj(vsigmaL,1,j)
+     2  -alj(vsigmaL,2,j+1))
+         pot(4)=pot(4)+2.0d0*x2*y2*((2*jd-1.0d0)/jd2p1
+     1  *alj(vsigmaL,0,j-1)+2.0d0/jd2p1*alj(vsigmaL,1,j)
+     2  -alj(vsigmaL,2,j-1))
+         pot(5)=pot(5)-4.0d0*x2*y2*dsqrt(jd*jdp1)/(jd2p1)**2*
+     1  (alj(vsigmaL,0,j+1)-alj(vsigmaL,0,j-1))
+         pot(6)=pot(5)
+         end if 
+         return
+         end subroutine
+
+         subroutine lsjvsigmak(pot,vsigmak,j)
+c        global(x,y,x2,y2)
+         use paravari,only:x,y,x2,y2
+                
+c        input         
+         real*8,external :: vsigmak
+         integer j
+c        output
+         real*8 pot(6)
+c        local
+         real*8,external :: alj
+         real*8 jd,jdp1,jd2p1
+         
+         pot=0.0d0
+         jd=dfloat(j)
+         jdp1=jd+1.0d0
+         jd2p1=2.0d0*jd+1.0d0
+         if (j .eq. 0) then
+        pot(1)=pot(1)+0.5d0*(-(x2+y2)*alj(vsigmak,0,j)
+     1  -2.0d0*x*y*alj(vsigmak,1,j))
+        pot(3)=pot(3)+0.5d0/jd2p1*(-(x2+y2)*alj(vsigmak,0,j+1)
+     1  -2.0d0*x*y*alj(vsigmak,0,j))
+        else
+        pot(1)=pot(1)+0.5d0*(-(x2+y2)*alj(vsigmak,0,j)
+     1  -2.0d0*x*y*alj(vsigmak,1,j))
+        pot(2)=pot(2)+0.5d0*((x2+y2)*alj(vsigmak,0,j)
+     1  +2.0d0*x*y/jd2p1*(jd*alj(vsigmak,0,j+1)
+     2  +jdp1*alj(vsigmak,0,j-1)))
+        pot(3)=pot(3)+0.5d0/jd2p1*(-(x2+y2)*alj(vsigmak,0,j+1)
+     1  -2.0d0*x*y*alj(vsigmak,0,j))
+        pot(4)=pot(4)+0.5d0/jd2p1*((x2+y2)*alj(vsigmak,0,j-1)
+     1  +2.0d0*x*y*alj(vsigmak,0,j))
+        pot(5)=pot(5)-1.0d0*dsqrt(jd*jdp1)/jd2p1*(y2*alj(vsigmak,0,j+1)
+     1  +x2*alj(vsigmak,0,j-1)+2.0d0*x*y*alj(vsigmak,0,j) )   
+        pot(6)=pot(6)-1.0d0*dsqrt(jd*jdp1)/jd2p1*(y2*alj(vsigmak,0,j-1)
+     1  +x2*alj(vsigmak,0,j+1)+2.0d0*x*y*alj(vsigmak,0,j) )
+        end if
+        return
+       end subroutine
+    
         subroutine isospindependent(pot1,j,pot2)
 c       this subroutine contains the tau1 dot tau2 terms factor
 
@@ -1014,7 +1124,7 @@ c   when j=0,there is only two terms do not equal to zero
             
 
         call lsjvcentral(vcct,vcentral,j)
-        pot=vcct
+c        pot=vcct
         call lsjvcentral(temp1,nlowc,j)
         call isospindependent(temp1,j,nlowcel) 
         pot=pot+nlowcel
@@ -1023,7 +1133,7 @@ c   when j=0,there is only two terms do not equal to zero
 
 c   spin-spin force part
        call lsjvspinspin(temp1,vspinspin,j)
-       pot=pot+temp1
+c       pot=pot+temp1
        call lsjvspinspin(temp1,nlovss,j)
        pot=pot+temp1
        call lsjvspinspin(temp1,n2lows,j)
@@ -1032,32 +1142,15 @@ c   spin-spin force part
 
 c   spin-obit force part
        call lsjvspinobit(temp1,vspinobit,j)
-       pot=pot+temp1
+c       pot=pot+temp1
 c   sigmaL force part
         
-        if (j .eq. 0) then
-        pot(1)=pot(1)+2.0d0*x2*y2*(alj(vsigmaL,2,j)-alj(vsigmaL,0,j))
-        pot(3)=pot(3)+2.0d0*x2*y2*((2.0d0*jd+3.0d0)/jd2p1
-     1  *alj(vsigmaL,0,j+1)-2.0d0/jd2p1*alj(vsigmaL,1,j)
-     2  -alj(vsigmaL,2,j+1))
-        else
-        pot(1)=pot(1)+2.0d0*x2*y2*(alj(vsigmaL,2,j)-alj(vsigmaL,0,j))
-        pot(2)=pot(2)+2.0d0*x2*y2*(-alj(vsigmaL,0,j)+(jd-1.0d0)/jd2p1
-     1  *alj(vsigmaL,1,j+1)+(jd+2.0d0)/jd2p1*alj(vsigmaL,1,j-1))
-        pot(3)=pot(3)+2.0d0*x2*y2*((2.0d0*jd+3.0d0)/jd2p1
-     1  *alj(vsigmaL,0,j+1)-2.0d0/jd2p1*alj(vsigmaL,1,j)
-     2  -alj(vsigmaL,2,j+1))
-        pot(4)=pot(4)+2.0d0*x2*y2*((2*jd-1.0d0)/jd2p1
-     1  *alj(vsigmaL,0,j-1)+2.0d0/jd2p1*alj(vsigmaL,1,j)
-     2  -alj(vsigmaL,2,j-1))
-        pot(5)=pot(5)-4.0d0*x2*y2*dsqrt(jd*jdp1)/(jd2p1)**2*
-     1  (alj(vsigmaL,0,j+1)-alj(vsigmaL,0,j-1))
-        pot(6)=pot(5)
-        end if 
+       call lsjvsigmal(temp1,vsigmaL,j)
+c       pot=pot+temp1
         
 c   tensor force part
         call lsjvtensor(temp1,vtensor,j)
-        pot=pot+temp1
+c        pot=pot+temp1
         call lsjvtensor(temp1,onepii0,j)
         call lsjvtensor(temp2,onepii1,j)
       if(mod(j,2) .eq. 1)then 
@@ -1079,26 +1172,17 @@ c   nlo vtensor
         pot=pot+n2lowtel
 c   sigmak force part
 
-      if (j .eq. 0) then
-        pot(1)=pot(1)+0.5d0*(-(x2+y2)*alj(vsigmak,0,j)
-     1  -2.0d0*x*y*alj(vsigmak,1,j))
-        pot(3)=pot(3)+0.5d0/jd2p1*(-(x2+y2)*alj(vsigmak,0,j+1)
-     1  -2.0d0*x*y*alj(vsigmak,0,j))
-        else
-        pot(1)=pot(1)+0.5d0*(-(x2+y2)*alj(vsigmak,0,j)
-     1  -2.0d0*x*y*alj(vsigmak,1,j))
-        pot(2)=pot(2)+0.5d0*((x2+y2)*alj(vsigmak,0,j)
-     1  +2.0d0*x*y/jd2p1*(jd*alj(vsigmak,0,j+1)
-     2  +jdp1*alj(vsigmak,0,j-1)))
-        pot(3)=pot(3)+0.5d0/jd2p1*(-(x2+y2)*alj(vsigmak,0,j+1)
-     1  -2.0d0*x*y*alj(vsigmak,0,j))
-        pot(4)=pot(4)+0.5d0/jd2p1*((x2+y2)*alj(vsigmak,0,j-1)
-     1  +2.0d0*x*y*alj(vsigmak,0,j))
-        pot(5)=pot(5)-1.0d0*dsqrt(jd*jdp1)/jd2p1*(y2*alj(vsigmak,0,j+1)
-     1  +x2*alj(vsigmak,0,j-1)+2.0d0*x*y*alj(vsigmak,0,j) )   
-        pot(6)=pot(6)-1.0d0*dsqrt(jd*jdp1)/jd2p1*(y2*alj(vsigmak,0,j-1)
-     1  +x2*alj(vsigmak,0,j+1)+2.0d0*x*y*alj(vsigmak,0,j) )
-        end if
+        call lsjvsigmak(temp1,vsigmak,j)
+c        pot=pot+temp1
+        call lsjvtensor(temp1,pi_gamma,j)
+        call isospindependent(temp1,j,temp2)
+c        pot=pot+temp2
+        call n3lo_rc%init
+        call n3lo_fd%init
+        call lsjvcentral(n3lo_rc%vc,n3lo_vc_rc,j)
+        pot=pot+n3lo_rc%vc
+        call lsjvcentral(n3lo_fd%vc,n3lo_vc_fd,j)
+c        pot=pot+n3lo_fd%vc
                 
         ex=dsqrt(1.0d0+x*x)
         ey=dsqrt(1.0d0+y*y)
