@@ -1185,6 +1185,8 @@ c        pot=pot+temp2
         pot=pot+n3lo_rc%vt
         call lsjvspinspin(n3lo_rc%vss,n3lo_vs_rc,j)
         pot=pot+n3lo_rc%vss
+        call lsjvspinobit(n3lo_rc%vls,n3lo_vls_rc,j)
+        pot=pot+n3lo_rc%vls
         call lsjvcentral(n3lo_fd%vc,n3lo_vc_fd,j)
 c        pot=pot+n3lo_fd%vc
                 
