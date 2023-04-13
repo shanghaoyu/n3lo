@@ -1200,7 +1200,7 @@ c        pot=pot+temp2
         call isospindependent(temp1,j,n3lo_rc%wls)
         pot=pot+n3lo_rc%wls
         call lsjvcentral(n3lo_fd%vc,n3lo_vc_fd,j)
-c        pot=pot+n3lo_fd%vc
+        pot=pot+n3lo_fd%vc
                 
         ex=dsqrt(1.0d0+x*x)
         ey=dsqrt(1.0d0+y*y)
