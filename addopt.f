@@ -46,6 +46,7 @@ c   subroutine :ini_const
          real*8 ::c2=0.0d0
          real*8 ::c3=-3.61d0
          real*8 ::c4=2.44d0
+         real*8 ::d15m14=1.90d0
          contains
          subroutine ini_const
 c      this subroutine should been used in the main programm            
@@ -58,6 +59,7 @@ c      this subroutine should been used in the main programm
             c2=c2*1.0d-3*mass
             c3=c3*1.0d-3*mass
             c4=c4*1.0d-3*mass
+            d15m14=d15m14*1.0d-6*mass*mass
          end subroutine
       end module
      
@@ -608,7 +610,7 @@ c     function
          public n3lo_vc_fd,n3lo_wt_fd,n3lo_ws_fd 
          public n3lo_vc_rc,n3lo_wc_rc,n3lo_vt_rc,n3lo_wt_rc,
      +    n3lo_vs_rc,n3lo_ws_rc,n3lo_vls_rc,n3lo_wls_rc
-         public n3lo_vc_tl
+         public n3lo_vc_tl,n3lo_ws_tl,n3lo_wt_tl
          public  pi_gamma  
 c     subroutine         
          
@@ -723,11 +725,20 @@ c     spectral functions,name as n3lo_imv(mu)
         return
       end function
 
-c     the two loop integrate
-c       subroutine       
+        real*8 function n3lo_imvs(mu)
+        real*8 mu
+        real*8 rk  !rootk
+        rk=dsqrt(mu**2/4.0d0-mpi**2)
+        return
+        end function
+   
 c     two loop contributions(tl)
-        real*8 function n3lo_vc_tl(z)
+
+c     v_{C,S}=-2q^2/pi*integrate_{2mpi,Lambda}(imvcs(i mu)/(mu^5(mu^2+q^2)))
+        real*8 function vcstl(func,z)
+c      input
         real*8 z
+        real*8,external ::func
 c     local 
         real*8 wt(96),ct(96)
         real*8 xlb
@@ -738,13 +749,52 @@ c     local
 c     the integral
         integral=0.0d0
         do i=1,96
-         integral=integral+wt(i)*(n3lo_imvc(ct(i))/
+         integral=integral+wt(i)*(func(ct(i))/
      +    (ct(i)**5*(ct(i)**2+normq(z)**2)))
         end do
-        n3lo_vc_tl=-2.0d0*normq(z)**6/pi*integral
+        vcstl=-2.0d0*normq(z)**6/pi*integral
         return
       end function
 
+c     v_{T,LS}
+        real*8 function vtlstl(func,z)
+c      input
+        real*8 z
+        real*8,external ::func
+c     local 
+        real*8 wt(96),ct(96)
+        real*8 xlb
+        real*8 integral
+        integer i
+        xlb=2.0d0*mpi
+        call fset(ct,wt,xlb,tidelambda)
+c     the integral
+        integral=0.0d0
+        do i=1,96
+         integral=integral+wt(i)*(func(ct(i))/
+     +    (ct(i)**3*(ct(i)**2+normq(z)**2)))
+        end do
+        vtlstl=2.0d0*normq(z)**4/pi*integral
+        return
+      end function
+
+      real*8 function n3lo_vc_tl(z)
+      real*8 z
+      n3lo_vc_tl=vcstl(n3lo_imvc,z)
+      return
+      end function
+      
+      real*8 function n3lo_ws_tl(z)
+      real*8 z
+      n3lo_ws_tl=vcstl(n3lo_imws,z)
+      return
+      end function 
+
+      real*8 function n3lo_wt_tl(z)
+      real*8 z
+      n3lo_wt_tl=vtlstl(n3lo_imwt,z)
+      return
+      end function
 
 
 c    pi-gamma (charge dependent) (wt)
@@ -1265,8 +1315,12 @@ c        pot=pot+temp2
         pot=pot+n3lo_fd%wss
         call lsjvcentral(n3lo_tl%vc,n3lo_vc_tl,j)
         pot=pot+n3lo_tl%vc
-
-                
+        call lsjvspinspin(temp1,n3lo_ws_tl,j)
+        call isospindependent(temp1,j,n3lo_tl%wss)
+        pot=pot+n3lo_tl%wss
+        call lsjvtensor(temp1,n3lo_wt_tl,j)
+        call isospindependent(temp1,j,n3lo_tl%wt)
+        pot=pot+n3lo_tl%wt               
         ex=dsqrt(1.0d0+x*x)
         ey=dsqrt(1.0d0+y*y)
         ree=dsqrt(ex*ey)
