@@ -709,21 +709,41 @@ c     spectral functions,name as n3lo_imv(mu)
         return
       end function
 
+        real*8 function n3lo_imws(mu)
+        real*8 mu
+        n3lo_imws=ga**4*(4*mpi**2-mu**2)/(pi*(4.0d0*fpi)**6)
+     +   *((mpi**2-mu**2/4.0d0)*dlog((mu+2.0d0*mpi)/(mu-2.0d0*mpi))
+     +  +(1.0d0+2.0d0*ga**2)*mu*mpi)
+        return
+        end function
+
+        real*8 function n3lo_imwt(mu)
+        real*8 mu
+        n3lo_imwt=n3lo_imws(mu)/mu**2
+        return
+      end function
+
+c     the two loop integrate
+c       subroutine       
 c     two loop contributions(tl)
         real*8 function n3lo_vc_tl(z)
         real*8 z
-        real*8,external :: gauss_integral
-        n3lo_vc_tl=-2.0d0*normq(z)**6/pi
-     +   *gauss_integral(integrand,2.0d0*mpi,tidelambda)
+c     local 
+        real*8 wt(96),ct(96)
+        real*8 xlb
+        real*8 integral
+        integer i
+        xlb=2.0d0*mpi
+        call fset(ct,wt,xlb,tidelambda)
+c     the integral
+        integral=0.0d0
+        do i=1,96
+         integral=integral+wt(i)*(n3lo_imvc(ct(i))/
+     +    (ct(i)**5*(ct(i)**2+normq(z)**2)))
+        end do
+        n3lo_vc_tl=-2.0d0*normq(z)**6/pi*integral
         return
-        contains
-        real*8 function integrand(mu)
-c     z is the constant in this function        
-        real*8 mu
-        integrand=n3lo_imvc(mu)/(mu**5*(mu**2+normq(z)**2))
-        return
-         end function
-      end function 
+      end function
 
 
 
@@ -801,26 +821,21 @@ c   ALJ^J(q',q)=pi*INTEGRATE[fuc(q',q,z) z^l P_J(z)，-1,1]
 c    input        
         real*8,external :: func
         real*8,external :: legendre
-        real*8,external :: gauss_integral
         integer :: l,j
 c    output        
         real*8 :: alj
 c    local
-        real*8 :: pi       
+        real*8 :: pi   
+        real*8 ::ct(96),wt(96)  
+        integer ::i  
 
         alj=0.0d0
         pi=3.141592653589793d0
-        alj=gauss_integral(integrand,-1.0d0,1.0d0)
+        call fset(ct,wt,-1.0d0,1.0d0)
+        do i=1,96
+        alj=alj+wt(i)*(legendre(ct(i),j)*func(ct(i))*ct(i)**l*pi)
+        end do
         return
-        contains
-c   define the integrand        
-        function integrand(z)
-         implicit none
-         real*8 ::z
-         real*8 ::integrand
-         integrand=legendre(z,j)*func(z)*z**l*pi
-         return
-        end function
         end
 
 c   this function calculate the cutoff
@@ -837,17 +852,14 @@ c   lambda is cutoff energy ,n adjust the sharp degree
         cutoff=dexp(-expo)  
         end
 
-        function gauss_integral(func,xlb,xub)
-c     input  
-        real*8,external :: func
+        subroutine fset(ct,wt,xlb,xub)
+c     the intergral is sun( wt(i)*f(ct(i))
 c       the integrate low bound and up bound        
         real*8 ::xlb,xub
-
-c     output
-        real*8 ::gauss_integral
-
+c       output  
+        real*8 ::ct(96),wt(96)        
 c     local
-        real*8 ::ct(96),wt(96),x(273),a(273)
+        real*8 ::x(273),a(273)
         integer :: i
         data x(226)/0.999689503883230d0/, a(226)/0.000796792065552d0/
         data x(227)/0.998364375863181d0/, a(227)/0.001853960788946d0/
@@ -899,7 +911,6 @@ c     local
         data x(273)/0.016276744849602d0/, a(273)/0.032550614492363d0/
         wt=0.0d0 
         ct=0.0d0
-        gauss_integral=0.0d0
         do  i=1,48
         wt(i)=a(225+i)   
         ct(i)=-x(225+i)
@@ -911,12 +922,9 @@ c     local
         do i=1,96
          ct(i)=xlb+(ct(i)+1.0d0)*(xub-xlb)/2.0d0
         end do
-        do i=1,96
-         gauss_integral=gauss_integral+func(ct(i))*wt(i)
-     +    *(xub-xlb)/2.0d0
-        end do
+        wt=wt*(xub-xlb)/2.0d0
         return             
-        end function
+      end subroutine
 
         module decompose
 c   this module calculate lsj decomposition
@@ -1255,8 +1263,8 @@ c        pot=pot+temp2
         call lsjvspinspin(temp1,n3lo_ws_fd,j)
         call isospindependent(temp1,j,n3lo_fd%wss)
         pot=pot+n3lo_fd%wss
-c        call lsjvcentral(n3lo_tl%vc,n3lo_vc_tl,j)
-c        pot=pot+n3lo_tl%vc
+        call lsjvcentral(n3lo_tl%vc,n3lo_vc_tl,j)
+        pot=pot+n3lo_tl%vc
 
                 
         ex=dsqrt(1.0d0+x*x)

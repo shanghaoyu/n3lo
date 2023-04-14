@@ -5158,7 +5158,7 @@ c
  1900 if (.not.indla.or.cc4.ne.c4) go to 20
       c5=c(mm,im)
       do 1905 i=1,nt
- 1905 aa(i)=0.0d0!aa(i)*c5*cpaa(i)
+ 1905 aa(i)=aa(i)*c5*cpaa(i)
       mi=mi+1
       mm=mm+1
       go to 5999
@@ -5175,7 +5175,7 @@ c
       do 2005 i=1,nt
       akk=-deltaq(i,1)
       radi=4.d0*c4+akk
- 2005 aa(i)=0.0d0!aa(i)*c5*radi*cpa(i)
+ 2005 aa(i)=aa(i)*c5*radi*cpa(i)
       mi=mi+1
       mm=mm+1
       go to 5999
@@ -5316,7 +5316,7 @@ c
       radi=4.d0*c4+akk
       brak=(cb2*radi/6.d0+cb3*(2.d0*c4+akk)-4.d0*cb1*c4)**2
      1    +(cb2*radi)**2/45.d0
- 3005 aa(i)=0.0d0!aa(i)*c5*ell(i)*brak
+ 3005 aa(i)=aa(i)*c5*ell(i)*brak
       mi=mi+1
       mm=mm+1
       go to 5999
@@ -5333,7 +5333,7 @@ c
       do 3105 i=1,nt
       akk=-deltaq(i,1)
       radi=4.d0*c4+akk
- 3105 aa(i)=0.0d0!aa(i)*c5*ell(i)*radi
+ 3105 aa(i)=aa(i)*c5*ell(i)*radi
       mi=mi+1
       mm=mm+1
       go to 5999
@@ -5499,7 +5499,7 @@ c           integrate over mu in [2m_pi, +infinity], and store result in aintmu
      1                  (amu4(ii)*amu(ii)*(amu2(ii)+aakk))
  4015       continue
 c
-            aa(i)=0.0d0!aa(i)*c5*aintmu
+            aa(i)=aa(i)*c5*aintmu
  4005 continue
 c
       mi=mi+1
@@ -7265,8 +7265,8 @@ c           aakk = q^2
             aakk=-deltaq(i,1)
             omega2 = 4.d0*c4 + aakk
 c
-            aa(i)=0.0d0!aa(i) * c5 *
-c     1   (  wpi5/2.d0/omega2 + (2.d0*c4 + aakk)*(aakk - c4)*cpa(i) )
+            aa(i)=aa(i) * c5 *
+     1   (  wpi5/2.d0/omega2 + (2.d0*c4 + aakk)*(aakk - c4)*cpa(i) )
 28105 continue
 c
       mi=mi+1
@@ -7296,10 +7296,10 @@ c           aakk = q^2
             aakk=-deltaq(i,1)
             omega2 = 4.d0*c4 + aakk
 c
-            aa(i)=0.0d0!aa(i) * c5 *
-c     1   (  3.d0*ga2*wpi5/2.d0/omega2 + 
-c     2            (ga2*(3.d0*c4 + 2.d0*aakk) - 2.d0*c4 - aakk)*
-c     3            (2.d0*c4 + aakk)*cpa(i)      )
+            aa(i)=aa(i) * c5 *
+     1   (  3.d0*ga2*wpi5/2.d0/omega2 + 
+     2            (ga2*(3.d0*c4 + 2.d0*aakk) - 2.d0*c4 - aakk)*
+     3            (2.d0*c4 + aakk)*cpa(i)      )
 28205 continue
 c
       mi=mi+1
@@ -7327,7 +7327,7 @@ c     iterate over output points aa(i), store results in them
 c           aakk = q^2 
             aakk=-deltaq(i,1)
 c
-            aa(i)=0.0d0!aa(i) * c5 * (5.d0*c4 + 2.d0*aakk)*cpa(i)
+            aa(i)=aa(i) * c5 * (5.d0*c4 + 2.d0*aakk)*cpa(i)
 28305 continue
 c
       mi=mi+1
@@ -7356,8 +7356,8 @@ c           aakk = q^2
             aakk=-deltaq(i,1)
             omega2 = 4.d0*c4 + aakk
 c
-            aa(i)=0.0d0!aa(i) * c5 * 
-c     1            (ga2*(3.d0*c4 + aakk) - omega2)*cpa(i)
+            aa(i)=aa(i) * c5 * 
+     1            (ga2*(3.d0*c4 + aakk) - omega2)*cpa(i)
 28405 continue
 c
       mi=mi+1
