@@ -736,14 +736,21 @@ c     spectral functions,name as n3lo_imv(mu)
         call fset(ct,wt,0.0d0,1.0d0,24)
         integral=0.0d0
         rk=dsqrt(mu**2/4.0d0-mpi**2)
-        do i=1,96
+        do i=1,24
         xr=ct(i)
-        integral=integral+wt(i)*((1.0d0-xr**2)*
-     +   (1.0d0/6.d0-mpi**2/(rk**2*xr**2)
-     +  +dsqrt((1.d0+mpi**2/(rk**2*xr**2))**3)
-     +   *dlog((rk*xr+dsqrt(mpi**2+rk**2*xr**2)/mpi))))
+c        term1=-mpi**2/(rk**2*xr**2)
+c        cterm1=(1.0d0-term1)**(1.5d0)
+c        cterm2=dsqrt(1.0d0-1.0d0/term1)
+c        cterm3=dlog(cterm2+dsqrt(-1.0d0/term1))
+c        term2=cterm1*cterm3
+c        term2=(1.d0+mpi**2/(rk**2*xr**2))**(1.5d0)
+c     +   *dlog((rk*xr+dsqrt(mpi**2+rk**2*xr**2))/mpi)
+c        term=term1+term2
+        integral=integral+wt(i)*((1.0d0-xr**2)*(1.0d0/6.0d0
+     +  -mpi**2/(rk**2*xr**2)+(1.0d0+mpi**2/(rk**2*xr**2))**(1.5d0)
+     +   *dlog((rk*xr+dsqrt(mpi**2+rk**2*xr**2))/mpi)))  
         end do
-        n3lo_imvs=ga**2*mu*rk**3/(8.0d0*pi*fpi**4)*d15m14
+        n3lo_imvs=!ga**2*mu*rk**3/(8.0d0*pi*fpi**4)*d15m14
      +  +2.0d0*ga**6*mu*rk**3/(8.0d0*pi*fpi**2)**3*integral
         return
         end function
@@ -753,7 +760,10 @@ c     spectral functions,name as n3lo_imv(mu)
         n3lo_imvt=n3lo_imvs(mu)/mu**2
         return
       end function
-   
+        
+c        real*8 function n3lo_imwc(mu)
+c        real*8 mu
+        
 c     two loop contributions(tl)
 
 c     v_{C,S}=-2q^2/pi*integrate_{2mpi,Lambda}(imvcs(i mu)/(mu^5(mu^2+q^2)))
@@ -1280,10 +1290,10 @@ c        pot=pot+temp2
         call lsjvtensor(temp1,n3lo_wt_tl,j)
         call isospindependent(temp1,j,n3lo_tl%wt)
         pot=pot+n3lo_tl%wt
-c       call lsjvspinspin(n3lo_tl%vss,n3lo_vs_tl,j)
-c        pot=pot+n3lo_tl%vss
-c        call lsjvtensor(n3lo_tl%vt,n3lo_vt_tl,j)
-c        pot=pot+n3lo_tl%vt
+       call lsjvspinspin(n3lo_tl%vss,n3lo_vs_tl,j)
+        pot=pot+n3lo_tl%vss
+        call lsjvtensor(n3lo_tl%vt,n3lo_vt_tl,j)
+        pot=pot+n3lo_tl%vt
         ex=dsqrt(1.0d0+x*x)
         ey=dsqrt(1.0d0+y*y)
         ree=dsqrt(ex*ey)
