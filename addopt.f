@@ -48,6 +48,9 @@ c   subroutine :ini_const
          real*8 ::c3=-3.61d0
          real*8 ::c4=2.44d0
          real*8 ::d15m14=1.90d0
+         real*8 ::d1p2=1.04d0 
+         real*8 ::d3=-0.48d0 
+         real*8 ::d5=0.14d0
          contains
          subroutine ini_const
 c      this subroutine should been used in the main programm            
@@ -61,6 +64,9 @@ c      this subroutine should been used in the main programm
             c3=c3*1.0d-3*mass
             c4=c4*1.0d-3*mass
             d15m14=d15m14*1.0d-6*mass*mass
+            d1p2=d1p2*1.0d-6*mass*mass
+            d3=d3*1.0d-6*mass*mass
+            d5=d5*1.0d-6*mass*mass
          end subroutine
       end module
      
@@ -611,7 +617,8 @@ c     function
          public n3lo_vc_fd,n3lo_wt_fd,n3lo_ws_fd 
          public n3lo_vc_rc,n3lo_wc_rc,n3lo_vt_rc,n3lo_wt_rc,
      +    n3lo_vs_rc,n3lo_ws_rc,n3lo_vls_rc,n3lo_wls_rc
-         public n3lo_vc_tl,n3lo_ws_tl,n3lo_wt_tl,n3lo_vs_tl,n3lo_vt_tl
+         public n3lo_vc_tl,n3lo_ws_tl,n3lo_wt_tl,n3lo_vs_tl,n3lo_vt_tl,
+     +    n3lo_wc_tl
          public  pi_gamma  
 c     subroutine         
          
@@ -733,19 +740,11 @@ c     spectral functions,name as n3lo_imv(mu)
         real*8 integral,xr  !x regulation
         real*8 wt(96),ct(96)
         integer i
-        call fset(ct,wt,0.0d0,1.0d0,24)
+        call fset(ct,wt,0.0d0,1.0d0,12)
         integral=0.0d0
         rk=dsqrt(mu**2/4.0d0-mpi**2)
-        do i=1,24
+        do i=1,12
         xr=ct(i)
-c        term1=-mpi**2/(rk**2*xr**2)
-c        cterm1=(1.0d0-term1)**(1.5d0)
-c        cterm2=dsqrt(1.0d0-1.0d0/term1)
-c        cterm3=dlog(cterm2+dsqrt(-1.0d0/term1))
-c        term2=cterm1*cterm3
-c        term2=(1.d0+mpi**2/(rk**2*xr**2))**(1.5d0)
-c     +   *dlog((rk*xr+dsqrt(mpi**2+rk**2*xr**2))/mpi)
-c        term=term1+term2
         integral=integral+wt(i)*((1.0d0-xr**2)*(1.0d0/6.0d0
      +  -mpi**2/(rk**2*xr**2)+(1.0d0+mpi**2/(rk**2*xr**2))**(1.5d0)
      +   *dlog((rk*xr+dsqrt(mpi**2+rk**2*xr**2))/mpi)))  
@@ -761,9 +760,39 @@ c        term=term1+term2
         return
       end function
         
-c        real*8 function n3lo_imwc(mu)
-c        real*8 mu
-        
+        real*8 function n3lo_imwc(mu)
+        implicit none
+        real*8 mu
+        real*8 rk,wt(96),ct(96),xr
+        real*8 term1,term21,term22,term23,term24,term
+        real*8 integral
+        integer ::i
+        integral=0.0d0
+        call fset(ct,wt,0.0d0,1.0d0,12)
+        rk=dsqrt(mu**2/4.0d0-mpi**2)
+        do i=1,12
+        xr=ct(i)
+        term1=ga**2*(mu**2-2.0d0*mpi**2)+2.0d0*
+     +   (1.0d0-ga**2)*rk**2*xr**2
+        term21=96.0d0*pi**2*fpi**2*((2.0d0*mpi**2-mu**2)
+     +   *d1p2-2.0d0*rk**2*xr**2*d3+4.0d0*mpi**2*d5)
+        term22=(4.0d0*mpi**2*(1.0d0+2.0d0*ga**2)-mu**2
+     +   *(1.0d0+5.0d0*ga**2))*rk/mu*dlog((mu+2.0d0*rk)
+     +  /(2.0d0*mpi))+mu**2/12.0d0*(5.0d0+13.0d0*ga**2)
+     +  -2.0d0*mpi**2*(1.0d0+2.0*ga**2)
+        term23=-3.0d0*rk**2*xr**2+6.0d0*rk*xr*dsqrt(mpi**2
+     +   +rk**2*xr**2)*dlog((rk*xr+dsqrt(mpi**2+rk**2*xr**2))/mpi)
+        term24=ga**4*(mu**2-2.0d0*rk**2*xr**2-2.0d0*mpi**2)
+     +   *(5.0d0/6.0d0+mpi**2/(rk**2*xr**2)-(1.0d0+mpi**2
+     +   /(rk**2*xr**2))**(1.5d0)*dlog((rk*xr+dsqrt(mpi**2
+     +   +rk**2*xr**2))/mpi))
+        term=term1*(term23+term24)
+        integral=integral+wt(i)*term
+        end do
+        n3lo_imwc=(2.0d0*rk)/(3.0d0*mu*(8.0d0*pi*fpi**2)**3)*integral
+        return
+        end function
+         
 c     two loop contributions(tl)
 
 c     v_{C,S}=-2q^2/pi*integrate_{2mpi,Lambda}(imvcs(i mu)/(mu^5(mu^2+q^2)))
@@ -837,6 +866,12 @@ c     the integral
       real*8 function n3lo_vt_tl(z)
       real*8 z
       n3lo_vt_tl=vtlstl(n3lo_imvt,z)
+      return
+      end function
+
+      real*8 function n3lo_wc_tl(z)
+      real*8 z
+      n3lo_wc_tl=vcstl(n3lo_imwc,z)
       return
       end function
 
@@ -1294,6 +1329,9 @@ c        pot=pot+temp2
         pot=pot+n3lo_tl%vss
         call lsjvtensor(n3lo_tl%vt,n3lo_vt_tl,j)
         pot=pot+n3lo_tl%vt
+        call lsjvcentral(temp1,n3lo_wc_tl,j)
+        call isospindependent(temp1,j,n3lo_tl%wc)
+        pot=pot+n3lo_tl%wc
         ex=dsqrt(1.0d0+x*x)
         ey=dsqrt(1.0d0+y*y)
         ree=dsqrt(ex*ey)
@@ -1326,7 +1364,28 @@ c       output
 c     local
         real*8 ::x(273),a(273)
         integer :: i
-c**** n=20
+c     n=8
+      data x(16)/0.960289856497536 d0/, a(16)/0.101228536290376 d0/
+      data x(17)/0.796666477413627 d0/, a(17)/0.222381034453374 d0/
+      data x(18)/0.525532409916329 d0/, a(18)/0.313706645877887 d0/
+      data x(19)/0.183434642495650 d0/, a(19)/0.362683783378362 d0/
+c     n=12
+      data x(36)/0.981560634246719 d0/, a(36)/0.047175336386512 d0/
+      data x(37)/0.904117256370475 d0/, a(37)/0.106939325995318 d0/
+      data x(38)/0.769902674194305 d0/, a(38)/0.160078328543346 d0/
+      data x(39)/0.587317954286617 d0/, a(39)/0.203167426723066 d0/
+      data x(40)/0.367831498998180 d0/, a(40)/0.233492536538355 d0/
+      data x(41)/0.125233408511469 d0/, a(41)/0.249147045813403 d0/
+c     n=16
+      data x(64)/0.989400934991650 d0/, a(64)/0.027152459411754 d0/
+      data x(65)/0.944575023073233 d0/, a(65)/0.062253523938648 d0/
+      data x(66)/0.865631202387832 d0/, a(66)/0.095158511682493 d0/
+      data x(67)/0.755404408355003 d0/, a(67)/0.124628971255534 d0/
+      data x(68)/0.617876244402644 d0/, a(68)/0.149595988816577 d0/
+      data x(69)/0.458016777657227 d0/, a(69)/0.169156519395003 d0/
+      data x(70)/0.281603550779259 d0/, a(70)/0.182603415044924 d0/
+      data x(71)/0.095012509837637 d0/, a(71)/0.189450610455069 d0/      
+c      n=20
       data x(72)/0.993128599185094 d0/, a(72)/0.017614007139152 d0/
       data x(73)/0.963971927277913 d0/, a(73)/0.040601429800386 d0/
       data x(74)/0.912234428251325 d0/, a(74)/0.062672048334109 d0/
@@ -1402,6 +1461,33 @@ c       n=96
         wt=0.0d0 
         ct=0.0d0
         select case(n)
+        case(8)
+         do  i=1,n/2
+         wt(i)=a(15+i)   
+         ct(i)=-x(15+i)
+         end do
+         do  i=n,n/2,-1
+         ct(i)=-ct(n+1-i)
+         wt(i)=wt(n+1-i)
+         end do  
+      case(12)
+         do  i=1,n/2
+         wt(i)=a(35+i)   
+         ct(i)=-x(35+i)
+         end do
+         do  i=n,n/2,-1
+         ct(i)=-ct(n+1-i)
+         wt(i)=wt(n+1-i)
+         end do  
+      case(16)
+         do  i=1,n/2
+         wt(i)=a(63+i)   
+         ct(i)=-x(63+i)
+         end do
+         do  i=n,n/2,-1
+         ct(i)=-ct(n+1-i)
+         wt(i)=wt(n+1-i)
+         end do
       case(20)
         do  i=1,n/2
         wt(i)=a(71+i)   
