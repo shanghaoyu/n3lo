@@ -749,7 +749,7 @@ c     spectral functions,name as n3lo_imv(mu)
      +  -mpi**2/(rk**2*xr**2)+(1.0d0+mpi**2/(rk**2*xr**2))**(1.5d0)
      +   *dlog((rk*xr+dsqrt(mpi**2+rk**2*xr**2))/mpi)))  
         end do
-        n3lo_imvs=!ga**2*mu*rk**3/(8.0d0*pi*fpi**4)*d15m14
+        n3lo_imvs=ga**2*mu*rk**3/(8.0d0*pi*fpi**4)*d15m14
      +  +2.0d0*ga**6*mu*rk**3/(8.0d0*pi*fpi**2)**3*integral
         return
         end function
@@ -786,7 +786,7 @@ c     spectral functions,name as n3lo_imv(mu)
      +   *(5.0d0/6.0d0+mpi**2/(rk**2*xr**2)-(1.0d0+mpi**2
      +   /(rk**2*xr**2))**(1.5d0)*dlog((rk*xr+dsqrt(mpi**2
      +   +rk**2*xr**2))/mpi))
-        term=term1*(term23+term24)
+        term=term1*(term21+term22+term23+term24)
         integral=integral+wt(i)*term
         end do
         n3lo_imwc=(2.0d0*rk)/(3.0d0*mu*(8.0d0*pi*fpi**2)**3)*integral
