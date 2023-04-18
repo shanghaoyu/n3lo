@@ -619,7 +619,8 @@ c     function
      +    n3lo_vs_rc,n3lo_ws_rc,n3lo_vls_rc,n3lo_wls_rc
          public n3lo_vc_tl,n3lo_ws_tl,n3lo_wt_tl,n3lo_vs_tl,n3lo_vt_tl,
      +    n3lo_wc_tl
-         public n3lo_vc_cM
+         public n3lo_vc_cM,n3lo_wc_cM,n3lo_wt_cM,n3lo_ws_cM,
+     +    n3lo_vls_cM,n3lo_wls_cM
          public  pi_gamma  
 c     subroutine         
          
@@ -886,6 +887,41 @@ c    ci/M contributions('cM')
      +  +24.0d0*(2.0d0*c1+c3)*mpi**6/wfunc(z)**2)
       return
       end function
+
+      real*8 function n3lo_wc_cM(z)
+      real*8 z
+      n3lo_wc_cM=-c4*normq(z)**2*lfunc(z)/(192.0d0*pi**2*fpi**4)
+     + *(ga**2*(8.0d0*mpi**2+5.0d0*normq(z)**2)+wfunc(z)**2)
+      return
+      end function
+      
+      real*8 function n3lo_wt_cM(z)
+      real*8 z
+      n3lo_wt_cM=-c4*lfunc(z)/(192.0d0*pi**2*fpi**4)*
+     + (ga**2*(16.0d0*mpi**2+7.0d0*normq(z)**2)-wfunc(z)**2)
+      return
+      end function
+
+      real*8 function n3lo_ws_cM(z)
+      real*8 z
+      n3lo_ws_cM=-n3lo_wt_cM(z)*normq(z)**2
+      return
+      end function
+
+      real*8 function n3lo_vls_cM(z)
+      real*8 z
+      n3lo_vls_cM=c2*ga**2/(8.0d0*pi**2*fpi**4)
+     + *wfunc(z)**2*lfunc(z)
+      return
+      end function
+
+      real*8 function n3lo_wls_cM(z)
+      real*8 z
+      n3lo_wls_cM=-c4*lfunc(z)/(48.0d0*pi**2*fpi**4)*
+     + (ga**2*(8.0d0*mpi**2+5.0d0*normq(z)**2)+wfunc(z)**2)
+      return
+      end function
+
 
 
 
@@ -1339,7 +1375,7 @@ c        pot=pot+temp2
         call lsjvtensor(temp1,n3lo_wt_tl,j)
         call isospindependent(temp1,j,n3lo_tl%wt)
         pot=pot+n3lo_tl%wt
-       call lsjvspinspin(n3lo_tl%vss,n3lo_vs_tl,j)
+        call lsjvspinspin(n3lo_tl%vss,n3lo_vs_tl,j)
         pot=pot+n3lo_tl%vss
         call lsjvtensor(n3lo_tl%vt,n3lo_vt_tl,j)
         pot=pot+n3lo_tl%vt
@@ -1348,6 +1384,20 @@ c        pot=pot+temp2
         pot=pot+n3lo_tl%wc
         call lsjvcentral(n3lo_cM%vc,n3lo_vc_cM,j)
         pot=pot+n3lo_cM%vc
+        call lsjvcentral(temp1,n3lo_wc_cM,j)
+        call isospindependent(temp1,j,n3lo_cM%wc)
+        pot=pot+n3lo_cM%wc
+        call lsjvtensor(temp1,n3lo_wt_cM,j)
+        call isospindependent(temp1,j,n3lo_cM%wt)
+        pot=pot+n3lo_cM%wt
+        call lsjvspinspin(temp1,n3lo_ws_cM,j)
+        call isospindependent(temp1,j,n3lo_cM%wss)
+        pot=pot+n3lo_cM%wss
+        call lsjvspinobit(n3lo_cM%vls,n3lo_vls_cM,j)
+        pot=pot+n3lo_cM%vls
+        call lsjvspinobit(temp1,n3lo_wls_cM,j)
+        call isospindependent(temp1,j,n3lo_cM%wls)
+        pot=pot+n3lo_cM%wls
         ex=dsqrt(1.0d0+x*x)
         ey=dsqrt(1.0d0+y*y)
         ree=dsqrt(ex*ey)
@@ -1425,6 +1475,39 @@ c       n=24
         data x(91)/0.315042679696163 d0/, a(91)/0.121670472927803 d0/
         data x(92)/0.191118867473616 d0/, a(92)/0.125837456346828 d0/
         data x(93)/0.064056892862605 d0/, a(93)/0.127938195346752 d0/
+c**** n=64
+      data x(154)/0.999305041735772d0/, a(154)/0.001783280721696d0/
+      data x(155)/0.996340116771955d0/, a(155)/0.004147033260562d0/
+      data x(156)/0.991013371476744d0/, a(156)/0.006504457968978d0/
+      data x(157)/0.983336253884625d0/, a(157)/0.008846759826363d0/
+      data x(158)/0.973326827789910d0/, a(158)/0.011168139460131d0/
+      data x(159)/0.961008799652053d0/, a(159)/0.013463047896718d0/
+      data x(160)/0.946411374858402d0/, a(160)/0.015726030476024d0/
+      data x(161)/0.929569172131939d0/, a(161)/0.017951715775697d0/
+      data x(162)/0.910522137078502d0/, a(162)/0.020134823153530d0/
+      data x(163)/0.889315445995114d0/, a(163)/0.022270173808383d0/
+      data x(164)/0.865999398154092d0/, a(164)/0.024352702568710d0/
+      data x(165)/0.840629296252580d0/, a(165)/0.026377469715054d0/
+      data x(166)/0.813265315122797d0/, a(166)/0.028339672614259d0/
+      data x(167)/0.783972358943341d0/, a(167)/0.030234657072402d0/
+      data x(168)/0.752819907260531d0/, a(168)/0.032057928354851d0/
+      data x(169)/0.719881850171610d0/, a(169)/0.033805161837141d0/
+      data x(170)/0.685236313054233d0/, a(170)/0.035472213256882d0/
+      data x(171)/0.648965471254657d0/, a(171)/0.037055128540240d0/
+      data x(172)/0.611155355172393d0/, a(172)/0.038550153178615d0/
+      data x(173)/0.571895646202634d0/, a(173)/0.039953741132720d0/
+      data x(174)/0.531279464019894d0/, a(174)/0.041262563242623d0/
+      data x(175)/0.489403145707052d0/, a(175)/0.042473515123653d0/
+      data x(176)/0.446366017253464d0/, a(176)/0.043583724529323d0/
+      data x(177)/0.402270157963991d0/, a(177)/0.044590558163756d0/
+      data x(178)/0.357220158337668d0/, a(178)/0.045491627927418d0/
+      data x(179)/0.311322871990210d0/, a(179)/0.046284796581314d0/
+      data x(180)/0.264687162208767d0/, a(180)/0.046968182816210d0/
+      data x(181)/0.217423643740007d0/, a(181)/0.047540165714830d0/
+      data x(182)/0.169644420423992d0/, a(182)/0.047999388596458d0/
+      data x(183)/0.121462819296120d0/, a(183)/0.048344762234802d0/
+      data x(184)/0.072993121787799d0/, a(184)/0.048575467441503d0/
+      data x(185)/0.024350292663424d0/, a(185)/0.048690957009139d0/        
 c       n=96        
         data x(226)/0.999689503883230d0/, a(226)/0.000796792065552d0/
         data x(227)/0.998364375863181d0/, a(227)/0.001853960788946d0/
@@ -1517,6 +1600,15 @@ c       n=96
          do  i=1,n/2
          wt(i)=a(81+i)   
          ct(i)=-x(81+i)
+         end do
+         do  i=n,n/2,-1
+         ct(i)=-ct(n+1-i)
+         wt(i)=wt(n+1-i)
+         end do
+      case(64)
+         do  i=1,n/2
+         wt(i)=a(153+i)   
+         ct(i)=-x(153+i)
          end do
          do  i=n,n/2,-1
          ct(i)=-ct(n+1-i)
