@@ -612,19 +612,21 @@ c   nlo vt
 
 c     the interface
 c     variable
-         public n3lo_fd,n3lo_rc,n3lo_tl
+         public n3lo_fd,n3lo_rc,n3lo_tl,n3lo_cM
 c     function
          public n3lo_vc_fd,n3lo_wt_fd,n3lo_ws_fd 
          public n3lo_vc_rc,n3lo_wc_rc,n3lo_vt_rc,n3lo_wt_rc,
      +    n3lo_vs_rc,n3lo_ws_rc,n3lo_vls_rc,n3lo_wls_rc
          public n3lo_vc_tl,n3lo_ws_tl,n3lo_wt_tl,n3lo_vs_tl,n3lo_vt_tl,
      +    n3lo_wc_tl
+         public n3lo_vc_cM
          public  pi_gamma  
 c     subroutine         
          
          type(velement) ::n3lo_fd
          type(velement) ::n3lo_rc
          type(velement) ::n3lo_tl
+         type(velement) ::n3lo_cM
 
          contains
 
@@ -874,6 +876,17 @@ c     the integral
       n3lo_wc_tl=vcstl(n3lo_imwc,z)
       return
       end function
+
+c    ci/M contributions('cM')
+      real*8 function n3lo_vc_cM(z)
+      real*8 z
+      n3lo_vc_cM=-ga**2*lfunc(z)/(32.0d0*pi**2*fpi**4)
+     +  *((c2-6.0d0*c3)*normq(z)**4+4.0d0*(6.0d0*c1+c2-3.0d0*c3)
+     +  *normq(z)**2*mpi**2+6.0d0*(c2-2.0d0*c3)*mpi**4
+     +  +24.0d0*(2.0d0*c1+c3)*mpi**6/wfunc(z)**2)
+      return
+      end function
+
 
 
 c    pi-gamma (charge dependent) (wt)
@@ -1289,6 +1302,7 @@ c        pot=pot+temp2
         call n3lo_rc%init
         call n3lo_fd%init
         call n3lo_tl%init
+        call n3lo_cM%init
         call lsjvcentral(n3lo_rc%vc,n3lo_vc_rc,j)
         pot=pot+n3lo_rc%vc
         call lsjvtensor(n3lo_rc%vt,n3lo_vt_rc,j)
@@ -1332,6 +1346,8 @@ c        pot=pot+temp2
         call lsjvcentral(temp1,n3lo_wc_tl,j)
         call isospindependent(temp1,j,n3lo_tl%wc)
         pot=pot+n3lo_tl%wc
+        call lsjvcentral(n3lo_cM%vc,n3lo_vc_cM,j)
+        pot=pot+n3lo_cM%vc
         ex=dsqrt(1.0d0+x*x)
         ey=dsqrt(1.0d0+y*y)
         ree=dsqrt(ex*ey)
