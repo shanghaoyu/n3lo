@@ -7,6 +7,7 @@ c    version four: 2023.4.6 NLO
 c    version five:2023.4.7 N2LO
 c    version six:2023.4.10 N2LO rebulid codes
 c    version seven:2023.4.14 N3LO except two loop terms
+c    version eight:2023.4.18 N3LO pion terms finished
 c
 c***********************************************************************
 c    
@@ -43,10 +44,10 @@ c   subroutine :ini_const
          real*8 ::mass=938.9182d0
          real*8 ::fpi=92.4d0
          real*8 ::tidelambda=650.0d0
-         real*8 ::c1=-0.74d0
-         real*8 ::c2=0.0d0
-         real*8 ::c3=-3.61d0
-         real*8 ::c4=2.44d0
+         real*8 ::c1=-1.07d0
+         real*8 ::c2=3.20d0
+         real*8 ::c3=-5.32d0
+         real*8 ::c4=3.56d0
          real*8 ::d15m14=1.90d0
          real*8 ::d1p2=1.04d0 
          real*8 ::d3=-0.48d0 
@@ -603,6 +604,8 @@ c   nlo vt
       end module
 
       module n3lopot
+c to improve the speed of calculation,you should use 
+c n3lo_ini before using subroutine n3lo500new(in the main programm)                 
          use velementm
          use const
          use genfunc
@@ -623,14 +626,32 @@ c     function
      +    n3lo_vls_cM,n3lo_wls_cM
          public  pi_gamma  
 c     subroutine         
-         
+         public n3lo_ini
+
          type(velement) ::n3lo_fd
          type(velement) ::n3lo_rc
          type(velement) ::n3lo_tl
          type(velement) ::n3lo_cM
+         real*8 :: imvs(96),imwc(96),imvc(96),
+     +   imws(96),imwt(96),imvt(96)    
 
          contains
-
+         subroutine n3lo_ini
+            implicit none
+            real*8 wt(96),ct(96)
+            real*8 xlb
+            integer i
+            xlb=2.0d0*mpi
+            call fset(ct,wt,xlb,tidelambda,96)
+            do i=1,96
+            imvs(i)=n3lo_imvs(ct(i))
+            imwc(i)=n3lo_imwc(ct(i))
+            imvc(i)=n3lo_imvc(ct(i))
+            imws(i)=n3lo_imws(ct(i))
+            imwt(i)=n3lo_imwt(ct(i))
+            imvt(i)=n3lo_imvt(ct(i))            
+            end do
+         end subroutine
 c     football diagram(the 'fd')
          real*8 function n3lo_vc_fd(z)
          real*8 z
@@ -802,7 +823,7 @@ c     v_{C,S}=-2q^2/pi*integrate_{2mpi,Lambda}(imvcs(i mu)/(mu^5(mu^2+q^2)))
         real*8 function vcstl(func,z)
 c      input
         real*8 z
-        real*8,external ::func
+        real*8 func(96)
 c     local 
         real*8 wt(96),ct(96)
         real*8 xlb
@@ -813,7 +834,7 @@ c     local
 c     the integral
         integral=0.0d0
         do i=1,96
-         integral=integral+wt(i)*(func(ct(i))/
+         integral=integral+wt(i)*(func(i)/
      +    (ct(i)**5*(ct(i)**2+normq(z)**2)))
         end do
         vcstl=-2.0d0*normq(z)**6/pi*integral
@@ -824,7 +845,7 @@ c     v_{T,LS}
         real*8 function vtlstl(func,z)
 c      input
         real*8 z
-        real*8,external ::func
+        real*8 func(96)
 c     local 
         real*8 wt(96),ct(96)
         real*8 xlb
@@ -835,7 +856,7 @@ c     local
 c     the integral
         integral=0.0d0
         do i=1,96
-         integral=integral+wt(i)*(func(ct(i))/
+         integral=integral+wt(i)*(func(i)/
      +    (ct(i)**3*(ct(i)**2+normq(z)**2)))
         end do
         vtlstl=2.0d0*normq(z)**4/pi*integral
@@ -844,37 +865,37 @@ c     the integral
 
       real*8 function n3lo_vc_tl(z)
       real*8 z
-      n3lo_vc_tl=vcstl(n3lo_imvc,z)
+      n3lo_vc_tl=vcstl(imvc,z)
       return
       end function
       
       real*8 function n3lo_ws_tl(z)
       real*8 z
-      n3lo_ws_tl=vcstl(n3lo_imws,z)
+      n3lo_ws_tl=vcstl(imws,z)
       return
       end function 
 
       real*8 function n3lo_wt_tl(z)
       real*8 z
-      n3lo_wt_tl=vtlstl(n3lo_imwt,z)
+      n3lo_wt_tl=vtlstl(imwt,z)
       return
       end function
 
       real*8 function n3lo_vs_tl(z)
       real*8 z
-      n3lo_vs_tl=vcstl(n3lo_imvs,z)
+      n3lo_vs_tl=vcstl(imvs,z)
       return
       end function 
 
       real*8 function n3lo_vt_tl(z)
       real*8 z
-      n3lo_vt_tl=vtlstl(n3lo_imvt,z)
+      n3lo_vt_tl=vtlstl(imvt,z)
       return
       end function
 
       real*8 function n3lo_wc_tl(z)
       real*8 z
-      n3lo_wc_tl=vcstl(n3lo_imwc,z)
+      n3lo_wc_tl=vcstl(imwc,z)
       return
       end function
 
