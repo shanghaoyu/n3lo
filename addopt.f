@@ -1518,12 +1518,12 @@ c      contact terms
 c       D_{3P0}         
          n3lo_ct%sum(3)=n3lo_ct%sum(3)*expexp3
          n3lo_ct%sum(1:2)=n3lo_ct%sum(1:2)*expexp2
-         n3lo_ct%sum(4:6)=n3lo_ct%sum(4:6)*expexp3
+         n3lo_ct%sum(4:6)=n3lo_ct%sum(4:6)*expexp2
         else if(j.eq.1)then
 c       D_{3P1}         
          n3lo_ct%sum(2)=n3lo_ct%sum(2)*expexp3
          n3lo_ct%sum(1)=n3lo_ct%sum(1)*expexp2
-         n3lo_ct%sum(3:6)=n3lo_ct%sum(3:6)*expexp3
+         n3lo_ct%sum(3:6)=n3lo_ct%sum(3:6)*expexp2
         else if(j.eq.2)then
 c       D_{1D2}         
          n3lo_ct%sum(1)=n3lo_ct%sum(1)*expexp3
