@@ -75,6 +75,9 @@ c      this subroutine should been used in the main programm
 c     this module contains the global variable of the subroutine potential
 
 c     variables:xmev,ymev,conta(24),lambda,j,v(6)
+c     v(6) means
+c     in the following order:
+c     0v(singlet), 1v(uncoupled triplet), v++, v--, v+-, v-+ (coupled)
 c     input
       real*8 xmev,ymev
       real*8 conta(24)
@@ -1511,6 +1514,28 @@ c      contact terms
         call lsjvsigmal(n3lo_ct%vslsl,n3lo_vslsl_ct,j)
         n3lo_ct%sum=n3lo_ct%vc+n3lo_ct%vss+n3lo_ct%vls
      +  +n3lo_ct%vt+n3lo_ct%vsk+n3lo_ct%vslsl
+        if(j .eq.0)then
+c       D_{3P0}         
+         n3lo_ct%sum(3)=n3lo_ct%sum(3)*expexp3
+         n3lo_ct%sum(1:2)=n3lo_ct%sum(1:2)*expexp2
+         n3lo_ct%sum(4:6)=n3lo_ct%sum(4:6)*expexp3
+        else if(j.eq.1)then
+c       D_{3P1}         
+         n3lo_ct%sum(2)=n3lo_ct%sum(2)*expexp3
+         n3lo_ct%sum(1)=n3lo_ct%sum(1)*expexp2
+         n3lo_ct%sum(3:6)=n3lo_ct%sum(3:6)*expexp3
+        else if(j.eq.2)then
+c       D_{1D2}         
+         n3lo_ct%sum(1)=n3lo_ct%sum(1)*expexp3
+c       D_{3D2}         
+         n3lo_ct%sum(2)=n3lo_ct%sum(2)*expexp3
+c       D_{3PF2}         
+         n3lo_ct%sum(5:6)=n3lo_ct%sum(5:6)*expexp4
+         n3lo_ct%sum(3:4)=n3lo_ct%sum(3:4)*expexp2
+        else
+         n3lo_ct%sum=n3lo_ct%sum*expexp2
+        end if
+
 
 
 c      pi exchange terms
