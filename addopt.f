@@ -240,6 +240,12 @@ c    parameters in lsj;if it's .false.,using parameters in pphase
             c(3)=t(3)
             c(4)=t(1)            
          end if
+         c(1)=c(1)*0.01d0*wnq
+         c(4)=c(4)*0.01d0*wnq
+         c(2)=c(2)*wnq*wnq*1.0d-8
+         c(3)=c(3)*wnq*wnq*1.0d-8
+         c(5:9)=c(5:9)*wnq*wnq*1.0d-8
+         c(10:24)=c(10:24)*wn3*wn3*1.0d-14
           end subroutine
          end module
          
@@ -329,6 +335,7 @@ c    in module add-terms we can add potential terms arbitrary
       module addterms
         use genfunc
         use paravari
+        use velementm
 c    we set some logical variable to control whether the terms 
 c    are contained(private),true means they are contained
         logical :: vc=.true.
@@ -337,6 +344,11 @@ c    are contained(private),true means they are contained
         logical :: vsigl=.true.
         logical :: vt=.true.
         logical :: vsigk=.true.
+        type(velement) ::lo_ct
+        type(velement) ::lo_onepi
+        type(velement) :: nlo_ct
+        type(velement) ::nlo_tp !two pi
+
 
         private vc,vt,vss,vso,vsigl,vsigk
 c    in the following terms w means terms with tau1*tau2
@@ -552,6 +564,48 @@ c   nlo vt
           nlovt=-3.0d0*ga**4/(64.0d0*pi**2*(fpi)**4)*lfunc(z)
           return
          end function
+         
+          real*8 function lo_vc_ct(z)
+          real*8 z
+          lo_vc_ct=c(1)
+          return
+          end function
+
+          real*8 function lo_vs_ct(z)
+          real*8 z
+          lo_vs_ct=c(4)
+          return
+          end function
+
+          real*8 function nlo_vc_ct(z)
+          real*8 z
+          nlo_vc_ct=c(2)*normq(z)**2+c(3)*normk(z)**2
+          return
+          end function
+
+          real*8 function nlo_vs_ct(z)
+          real*8 z
+          nlo_vs_ct=c(5)*normq(z)**2+c(6)*normk(z)**2 
+          return
+         end function
+
+          real*8 function nlo_vls_ct(z)
+          real*8 z
+          nlo_vls_ct=c(7)
+          return
+          end function
+         
+          real*8 function nlo_vt_ct(z)
+          real*8 z
+          nlo_vt_ct=c(8)
+          return
+         end function
+
+          real*8 function nlo_vsk_ct(z)
+          real*8 z
+          nlo_vsk_ct=c(9)
+          return
+          end function
 
           real*8 function n2lowt(z)
           real*8 z
@@ -585,6 +639,9 @@ c   nlo vt
          real*8 ::wt(6)
          real*8 ::vls(6)
          real*8 ::wls(6)
+         real*8 ::vsk(6)
+         real*8 ::vslsl(6)
+         real*8 ::sum(6)
          contains 
          procedure :: init => ini_velement
          end type
@@ -599,6 +656,9 @@ c   nlo vt
             this%wls=0.0d0
             this%wss=0.0d0
             this%wt=0.0d0
+            this%vsk=0.0d0
+            this%vslsl=0.0d0
+            this%sum=0.0d0
             end subroutine
 
       end module
@@ -609,13 +669,14 @@ c n3lo_ini before using subroutine n3lo500new(in the main programm)
          use velementm
          use const
          use genfunc
+         use paravari,only:c
 
          implicit none 
          private
 
 c     the interface
 c     variable
-         public n3lo_fd,n3lo_rc,n3lo_tl,n3lo_cM
+         public n3lo_fd,n3lo_rc,n3lo_tl,n3lo_cM,n3lo_ct
 c     function
          public n3lo_vc_fd,n3lo_wt_fd,n3lo_ws_fd 
          public n3lo_vc_rc,n3lo_wc_rc,n3lo_vt_rc,n3lo_wt_rc,
@@ -624,6 +685,8 @@ c     function
      +    n3lo_wc_tl
          public n3lo_vc_cM,n3lo_wc_cM,n3lo_wt_cM,n3lo_ws_cM,
      +    n3lo_vls_cM,n3lo_wls_cM
+         public n3lo_vc_ct,n3lo_vt_ct,n3lo_vls_ct,n3lo_vs_ct,
+     +    n3lo_vsk_ct,n3lo_vslsl_ct
          public  pi_gamma  
 c     subroutine         
          public n3lo_ini
@@ -632,6 +695,7 @@ c     subroutine
          type(velement) ::n3lo_rc
          type(velement) ::n3lo_tl
          type(velement) ::n3lo_cM
+         type(velement) ::n3lo_ct
          real*8 :: imvs(96),imwc(96),imvc(96),
      +   imws(96),imwt(96),imvt(96)    
 
@@ -943,7 +1007,44 @@ c    ci/M contributions('cM')
       return
       end function
 
+c   contact terms(ct)
+      real*8 function n3lo_vc_ct(z)
+      real*8 z
+       n3lo_vc_ct=c(10)*normq(z)**4+c(11)*normk(z)**4
+     + +c(12)*normq(z)**2*normk(z)**2+c(13)*kcrossq2(z)
+       return
+      end function
 
+      real*8 function n3lo_vs_ct(z)
+      real*8 z
+      n3lo_vs_ct=c(14)*normq(z)**4+c(15)*normk(z)**4
+     + +c(16)*normq(z)**2*normk(z)**2+c(17)*kcrossq2(z)
+       return
+       end function
+
+       real*8 function n3lo_vls_ct(z)
+       real*8 z
+       n3lo_vls_ct=c(18)*normq(z)**2+c(19)*normk(z)**2 
+       return
+      end function
+
+       real*8 function n3lo_vt_ct(z)
+       real*8 z
+       n3lo_vt_ct=c(20)*normq(z)**2+c(21)*normk(z)**2
+       return
+       end function
+
+       real*8 function n3lo_vsk_ct(z)
+       real*8 z
+       n3lo_vsk_ct=c(22)*normq(z)**2+c(23)*normk(z)**2
+       return
+      end function
+
+       real*8 function n3lo_vslsl_ct(z)
+       real*8 z
+       n3lo_vslsl_ct=c(24)
+       return
+       end function
 
 
 c    pi-gamma (charge dependent) (wt)
@@ -1285,13 +1386,14 @@ c       output
         use potential_global,only:lambda
         use n3lopot
         use decompose
-        implicit real*8 (a-h,o-z)
+        implicit none
         real*8 pot(6),jd,jdp1,jd2p1,temp1(6),temp2(6),vcct(6)
         real*8 nlowcel(6),nlovtel(6)
         real*8 n2lovcel(6),n2lowsel(6),n2lowtel(6)
         real*8,external :: cutoff
         real*8,external :: alj
-        integer j
+        real*8 ::ex,ey,ree,expexp2,expexp3,expexp4
+        integer ::j,i
         call ini_paravari
         pot=0.0d0
         jd=dfloat(j)
@@ -1301,20 +1403,73 @@ c       output
 c   central force part
 c   when j=0,there is only two terms do not equal to zero
             
+        ex=dsqrt(1.0d0+x*x)
+        ey=dsqrt(1.0d0+y*y)
+        ree=dsqrt(ex*ey)
+        expexp2=cutoff(lambda,2)
+        expexp3=cutoff(lambda,3)
+        expexp4=cutoff(lambda,4)
+c       lo 
 
-        call lsjvcentral(vcct,vcentral,j)
-c        pot=vcct
+c       contact terms
+        call lo_ct%init
+        call lo_onepi%init
+        call lsjvcentral(lo_ct%vc,lo_vc_ct,j)
+        call lsjvspinspin(lo_ct%vss,lo_vs_ct,j)
+        lo_ct%sum=lo_ct%vss+lo_ct%vc
+        lo_ct%sum=lo_ct%sum*expexp3
+
+c       one-pion terms
+        call lsjvtensor(temp1,onepii0,j)
+        call lsjvtensor(temp2,onepii1,j)
+        if(mod(j,2) .eq. 1)then 
+         lo_onepi%vt(1)=temp1(1)
+         lo_onepi%vt(2)=temp2(2)
+         lo_onepi%vt(3:6)=temp1(3:6)
+         else
+         lo_onepi%vt(1)=temp2(1)
+         lo_onepi%vt(2)=temp1(2)
+         lo_onepi%vt(3:6)=temp2(3:6)
+         end if
+         lo_onepi%sum=lo_onepi%vt
+         lo_onepi%sum=lo_onepi%sum*expexp4
+c        nlo
+
+c        contact terms
+         call nlo_ct%init
+         call lsjvcentral(nlo_ct%vc,nlo_vc_ct,j)
+         call lsjvspinspin(nlo_ct%vss,nlo_vs_ct,j)
+         call lsjvspinobit(nlo_ct%vls,nlo_vls_ct,j)
+         call lsjvtensor(nlo_ct%vt,nlo_vt_ct,j)
+         call lsjvsigmak(nlo_ct%vsk,nlo_vsk_ct,j)
+         nlo_ct%sum=nlo_ct%vc+nlo_ct%vss+nlo_ct%vls
+     +    +nlo_ct%vt+nlo_ct%vsk
+c        the C_{3P1} term n=3         
+         if(j .eq. 1)then
+            nlo_ct%sum(2)=nlo_ct%sum(2)*expexp3
+            nlo_ct%sum(1)=nlo_ct%sum(1)*expexp2
+            nlo_ct%sum(3:6)=nlo_ct%sum(3:6)*expexp2
+         else
+            nlo_ct%sum=nlo_ct%sum*expexp2
+         end if
+
+c       2-pi terms
+        call nlo_tp%init 
         call lsjvcentral(temp1,nlowc,j)
-        call isospindependent(temp1,j,nlowcel) 
-        pot=pot+nlowcel
+        call isospindependent(temp1,j,nlo_tp%wc)
+        call lsjvspinspin(nlo_tp%vss,nlovss,j)
+        call lsjvtensor(nlo_tp%vt,nlovt,j)
+        nlo_tp%sum=nlo_tp%wc+nlo_tp%vss+nlo_tp%vt
+        nlo_tp%sum=nlo_tp%sum*expexp2
+
+
         call lsjvcentral(n2lovcel,n2lovc,j)
         pot=pot+n2lovcel
 
 c   spin-spin force part
        call lsjvspinspin(temp1,vspinspin,j)
 c       pot=pot+temp1
-       call lsjvspinspin(temp1,nlovss,j)
-       pot=pot+temp1
+
        call lsjvspinspin(temp1,n2lows,j)
        call isospindependent(temp1,j,n2lowsel)
        pot=pot+n2lowsel   
@@ -1330,21 +1485,8 @@ c       pot=pot+temp1
 c   tensor force part
         call lsjvtensor(temp1,vtensor,j)
 c        pot=pot+temp1
-        call lsjvtensor(temp1,onepii0,j)
-        call lsjvtensor(temp2,onepii1,j)
-      if(mod(j,2) .eq. 1)then 
-         pot(1)=pot(1)+temp1(1)
-         pot(2)=pot(2)+temp2(2)
-         pot(3:6)=pot(3:6)+temp1(3:6)
-      else
-         pot(1)=pot(1)+temp2(1)
-         pot(2)=pot(2)+temp1(2)
-         pot(3:6)=pot(3:6)+temp2(3:6)
-      end if
 
-c   nlo vtensor
-        call lsjvtensor(nlovtel,nlovt,j)
-        pot=pot+nlovtel
+
 
         call lsjvtensor(temp1,n2lowt,j)
         call isospindependent(temp1,j,n2lowtel)
@@ -1356,76 +1498,78 @@ c        pot=pot+temp1
         call lsjvtensor(temp1,pi_gamma,j)
         call isospindependent(temp1,j,temp2)
 c        pot=pot+temp2
+        pot=pot*expexp2
+c   n3lo
+        
+c      contact terms
+        call n3lo_ct%init
+        call lsjvcentral(n3lo_ct%vc,n3lo_vc_ct,j)
+        call lsjvspinspin(n3lo_ct%vss,n3lo_vs_ct,j)
+        call lsjvspinobit(n3lo_ct%vls,n3lo_vls_ct,j)
+        call lsjvtensor(n3lo_ct%vt,n3lo_vt_ct,j)
+        call lsjvsigmak(n3lo_ct%vsk,n3lo_vsk_ct,j)
+        call lsjvsigmal(n3lo_ct%vslsl,n3lo_vslsl_ct,j)
+        n3lo_ct%sum=n3lo_ct%vc+n3lo_ct%vss+n3lo_ct%vls
+     +  +n3lo_ct%vt+n3lo_ct%vsk+n3lo_ct%vslsl
+
+
+c      pi exchange terms
         call n3lo_rc%init
         call n3lo_fd%init
         call n3lo_tl%init
         call n3lo_cM%init
         call lsjvcentral(n3lo_rc%vc,n3lo_vc_rc,j)
-        pot=pot+n3lo_rc%vc
         call lsjvtensor(n3lo_rc%vt,n3lo_vt_rc,j)
-        pot=pot+n3lo_rc%vt
         call lsjvspinspin(n3lo_rc%vss,n3lo_vs_rc,j)
-        pot=pot+n3lo_rc%vss
         call lsjvspinobit(n3lo_rc%vls,n3lo_vls_rc,j)
-        pot=pot+n3lo_rc%vls
         call lsjvcentral(temp1,n3lo_wc_rc,j)
         call isospindependent(temp1,j,n3lo_rc%wc)
-        pot=pot+n3lo_rc%wc
         call lsjvtensor(temp1,n3lo_wt_rc,j)
         call isospindependent(temp1,j,n3lo_rc%wt)
-        pot=pot+n3lo_rc%wt
         call lsjvspinspin(temp1,n3lo_ws_rc,j)
         call isospindependent(temp1,j,n3lo_rc%wss)
-        pot=pot+n3lo_rc%wss
         call lsjvspinobit(temp1,n3lo_wls_rc,j)
         call isospindependent(temp1,j,n3lo_rc%wls)
-        pot=pot+n3lo_rc%wls
+        n3lo_rc%sum=n3lo_rc%vc+n3lo_rc%vt+n3lo_rc%vss
+     +  +n3lo_rc%vls+n3lo_rc%wc+n3lo_rc%wt+n3lo_rc%wss
+     + +n3lo_rc%wls
+        n3lo_rc%sum=n3lo_rc%sum*expexp2
         call lsjvcentral(n3lo_fd%vc,n3lo_vc_fd,j)
-        pot=pot+n3lo_fd%vc
         call lsjvtensor(temp1,n3lo_wt_fd,j)
         call isospindependent(temp1,j,n3lo_fd%wt)
-        pot=pot+n3lo_fd%wt
         call lsjvspinspin(temp1,n3lo_ws_fd,j)
         call isospindependent(temp1,j,n3lo_fd%wss)
-        pot=pot+n3lo_fd%wss
+        n3lo_fd%sum=n3lo_fd%vc+n3lo_fd%wt+n3lo_fd%wss
+        n3lo_fd%sum=n3lo_fd%sum*expexp2
         call lsjvcentral(n3lo_tl%vc,n3lo_vc_tl,j)
-        pot=pot+n3lo_tl%vc
         call lsjvspinspin(temp1,n3lo_ws_tl,j)
         call isospindependent(temp1,j,n3lo_tl%wss)
-        pot=pot+n3lo_tl%wss
         call lsjvtensor(temp1,n3lo_wt_tl,j)
         call isospindependent(temp1,j,n3lo_tl%wt)
-        pot=pot+n3lo_tl%wt
         call lsjvspinspin(n3lo_tl%vss,n3lo_vs_tl,j)
-        pot=pot+n3lo_tl%vss
         call lsjvtensor(n3lo_tl%vt,n3lo_vt_tl,j)
-        pot=pot+n3lo_tl%vt
         call lsjvcentral(temp1,n3lo_wc_tl,j)
         call isospindependent(temp1,j,n3lo_tl%wc)
-        pot=pot+n3lo_tl%wc
+        n3lo_tl%sum=n3lo_tl%vc+n3lo_tl%wss+n3lo_tl%wt+n3lo_tl%vss
+     +  +n3lo_tl%vt+n3lo_tl%wc 
+        n3lo_tl%sum=n3lo_tl%sum*expexp2
         call lsjvcentral(n3lo_cM%vc,n3lo_vc_cM,j)
-        pot=pot+n3lo_cM%vc
         call lsjvcentral(temp1,n3lo_wc_cM,j)
         call isospindependent(temp1,j,n3lo_cM%wc)
-        pot=pot+n3lo_cM%wc
         call lsjvtensor(temp1,n3lo_wt_cM,j)
         call isospindependent(temp1,j,n3lo_cM%wt)
-        pot=pot+n3lo_cM%wt
         call lsjvspinspin(temp1,n3lo_ws_cM,j)
         call isospindependent(temp1,j,n3lo_cM%wss)
-        pot=pot+n3lo_cM%wss
         call lsjvspinobit(n3lo_cM%vls,n3lo_vls_cM,j)
-        pot=pot+n3lo_cM%vls
         call lsjvspinobit(temp1,n3lo_wls_cM,j)
         call isospindependent(temp1,j,n3lo_cM%wls)
-        pot=pot+n3lo_cM%wls
-        ex=dsqrt(1.0d0+x*x)
-        ey=dsqrt(1.0d0+y*y)
-        ree=dsqrt(ex*ey)
-        expexp=cutoff(lambda,2) 
-        do  i=1,6
-        pot(i)=pot(i)*expexp
-        end do
+        n3lo_cM%sum=n3lo_cM%vc+n3lo_cM%wc+n3lo_cM%wt+n3lo_cM%wss
+     +  +n3lo_cM%wls+n3lo_cM%vls
+        n3lo_cM%sum=n3lo_cM%sum*expexp2
+         
+c     sum all
+        pot=lo_ct%sum+lo_onepi%sum+nlo_ct%sum+nlo_tp%sum+pot
+     + +n3lo_cM%sum+n3lo_ct%sum+n3lo_fd%sum+n3lo_tl%sum+n3lo_rc%sum  
         do i=1,6
         pot(i)=pot(i)/(2.0d0*pi)**3*dwnq/ree
         end do
