@@ -8,6 +8,7 @@ c    version five:2023.4.7 N2LO
 c    version six:2023.4.10 N2LO rebulid codes
 c    version seven:2023.4.14 N3LO except two loop terms
 c    version eight:2023.4.18 N3LO pion terms finished
+c    version nine:2023.4.20 N3LO all
 c
 c***********************************************************************
 c    
@@ -347,8 +348,7 @@ c    are contained(private),true means they are contained
         logical :: vsigl=.true.
         logical :: vt=.true.
         logical :: vsigk=.true.
-        type(velement) ::lo_ct
-        type(velement) ::lo_onepi
+
         type(velement) :: nlo_ct
         type(velement) ::nlo_tp !two pi
 
@@ -537,30 +537,7 @@ c  form
           return
           end function
 c   nlo vt
-          real*8 function onepi(z,masspi)
-          real*8 z,masspi
-          onepi=-ga**2/(4.0d0*(fpi)**2
-     +     *(normq(z)**2+(masspi)**2))
-          return
-          end function
-
-          real*8 function onepi1(z)
-          real*8 z
-          onepi1=onepi(z,mpi)
-          return
-         end function
-
-          real*8 function onepii0(z)
-          real*8 z
-          onepii0=-onepi(z,mpi0)-2.0d0*onepi(z,mpipm)
-          return
-          end function
-
-          real*8 function onepii1(z)
-          real*8 z
-          onepii1=-onepi(z,mpi0)+2.0d0*onepi(z,mpipm)
-          return
-          end function
+         
            
           real*8 function nlovt(z)
           real*8 z
@@ -568,17 +545,7 @@ c   nlo vt
           return
          end function
          
-          real*8 function lo_vc_ct(z)
-          real*8 z
-          lo_vc_ct=c(1)
-          return
-          end function
 
-          real*8 function lo_vs_ct(z)
-          real*8 z
-          lo_vs_ct=c(4)
-          return
-          end function
 
           real*8 function nlo_vc_ct(z)
           real*8 z
@@ -647,6 +614,7 @@ c   nlo vt
          real*8 ::sum(6)
          contains 
          procedure :: init => ini_velement
+         procedure :: add => add_velement
          end type
          contains
          subroutine ini_velement(this)
@@ -663,9 +631,74 @@ c   nlo vt
             this%vslsl=0.0d0
             this%sum=0.0d0
             end subroutine
+         subroutine add_velement(this)
+            class(velement) ::this
+            this%sum=this%vc+this%vls+this%vss+this%vt
+     +    +this%wc+this%wls+this%wss+this%wt+this%vsk+this%vslsl
+         end subroutine
 
       end module
 
+      module lopot 
+         use genfunc
+         use paravari,only:c
+         use velementm
+         use const
+         
+         implicit none 
+         private
+
+c    the interface
+c    variable
+        public lo_ct,lo_onepi 
+c    function
+        public  onepii0,onepii1
+        public lo_vc_ct,lo_vs_ct      
+
+        type(velement) ::lo_ct
+        type(velement) ::lo_onepi
+        contains
+c    one-pi exchange term         
+         real*8 function onepi(z,masspi)
+          real*8 z,masspi
+          onepi=-ga**2/(4.0d0*(fpi)**2
+     +     *(normq(z)**2+(masspi)**2))
+          return
+          end function
+
+          real*8 function onepi1(z)
+          real*8 z
+          onepi1=onepi(z,mpi)
+          return
+         end function
+c     charge dependent one-pi terms
+c         I=0
+          real*8 function onepii0(z)
+          real*8 z
+          onepii0=-onepi(z,mpi0)-2.0d0*onepi(z,mpipm)
+          return
+          end function
+c         I=1
+          real*8 function onepii1(z)
+          real*8 z
+          onepii1=-onepi(z,mpi0)+2.0d0*onepi(z,mpipm)
+          return
+          end function
+
+c       contact terms
+          real*8 function lo_vc_ct(z)
+          real*8 z
+          lo_vc_ct=c(1)
+          return
+          end function
+
+          real*8 function lo_vs_ct(z)
+          real*8 z
+          lo_vs_ct=c(4)
+          return
+          end function          
+      
+      end module      
       module n3lopot
 c to improve the speed of calculation,you should use 
 c n3lo_ini before using subroutine n3lo500new(in the main programm)                 
@@ -1388,6 +1421,7 @@ c       output
         use addterms
         use potential_global,only:lambda
         use n3lopot
+        use lopot
         use decompose
         implicit none
         real*8 pot(6),jd,jdp1,jd2p1,temp1(6),temp2(6),vcct(6)
@@ -1419,7 +1453,7 @@ c       contact terms
         call lo_onepi%init
         call lsjvcentral(lo_ct%vc,lo_vc_ct,j)
         call lsjvspinspin(lo_ct%vss,lo_vs_ct,j)
-        lo_ct%sum=lo_ct%vss+lo_ct%vc
+        call lo_ct%add
         lo_ct%sum=lo_ct%sum*expexp3
 
 c       one-pion terms
@@ -1434,7 +1468,7 @@ c       one-pion terms
          lo_onepi%vt(2)=temp1(2)
          lo_onepi%vt(3:6)=temp2(3:6)
          end if
-         lo_onepi%sum=lo_onepi%vt
+         call lo_onepi%add
          lo_onepi%sum=lo_onepi%sum*expexp4
 c        nlo
 
@@ -1445,8 +1479,7 @@ c        contact terms
          call lsjvspinobit(nlo_ct%vls,nlo_vls_ct,j)
          call lsjvtensor(nlo_ct%vt,nlo_vt_ct,j)
          call lsjvsigmak(nlo_ct%vsk,nlo_vsk_ct,j)
-         nlo_ct%sum=nlo_ct%vc+nlo_ct%vss+nlo_ct%vls
-     +    +nlo_ct%vt+nlo_ct%vsk
+         call nlo_ct%add
 c        the C_{3P1} term n=3         
          if(j .eq. 1)then
             nlo_ct%sum(2)=nlo_ct%sum(2)*expexp3
@@ -1462,7 +1495,7 @@ c       2-pi terms
         call isospindependent(temp1,j,nlo_tp%wc)
         call lsjvspinspin(nlo_tp%vss,nlovss,j)
         call lsjvtensor(nlo_tp%vt,nlovt,j)
-        nlo_tp%sum=nlo_tp%wc+nlo_tp%vss+nlo_tp%vt
+        call nlo_tp%add
         nlo_tp%sum=nlo_tp%sum*expexp2
 
 
@@ -1512,8 +1545,7 @@ c      contact terms
         call lsjvtensor(n3lo_ct%vt,n3lo_vt_ct,j)
         call lsjvsigmak(n3lo_ct%vsk,n3lo_vsk_ct,j)
         call lsjvsigmal(n3lo_ct%vslsl,n3lo_vslsl_ct,j)
-        n3lo_ct%sum=n3lo_ct%vc+n3lo_ct%vss+n3lo_ct%vls
-     +  +n3lo_ct%vt+n3lo_ct%vsk+n3lo_ct%vslsl
+        call n3lo_ct%add
         if(j .eq.0)then
 c       D_{3P0}         
          n3lo_ct%sum(3)=n3lo_ct%sum(3)*expexp3
@@ -1555,16 +1587,14 @@ c      pi exchange terms
         call isospindependent(temp1,j,n3lo_rc%wss)
         call lsjvspinobit(temp1,n3lo_wls_rc,j)
         call isospindependent(temp1,j,n3lo_rc%wls)
-        n3lo_rc%sum=n3lo_rc%vc+n3lo_rc%vt+n3lo_rc%vss
-     +  +n3lo_rc%vls+n3lo_rc%wc+n3lo_rc%wt+n3lo_rc%wss
-     + +n3lo_rc%wls
+        call n3lo_rc%add
         n3lo_rc%sum=n3lo_rc%sum*expexp2
         call lsjvcentral(n3lo_fd%vc,n3lo_vc_fd,j)
         call lsjvtensor(temp1,n3lo_wt_fd,j)
         call isospindependent(temp1,j,n3lo_fd%wt)
         call lsjvspinspin(temp1,n3lo_ws_fd,j)
         call isospindependent(temp1,j,n3lo_fd%wss)
-        n3lo_fd%sum=n3lo_fd%vc+n3lo_fd%wt+n3lo_fd%wss
+        call n3lo_fd%add
         n3lo_fd%sum=n3lo_fd%sum*expexp2
         call lsjvcentral(n3lo_tl%vc,n3lo_vc_tl,j)
         call lsjvspinspin(temp1,n3lo_ws_tl,j)
@@ -1575,8 +1605,7 @@ c      pi exchange terms
         call lsjvtensor(n3lo_tl%vt,n3lo_vt_tl,j)
         call lsjvcentral(temp1,n3lo_wc_tl,j)
         call isospindependent(temp1,j,n3lo_tl%wc)
-        n3lo_tl%sum=n3lo_tl%vc+n3lo_tl%wss+n3lo_tl%wt+n3lo_tl%vss
-     +  +n3lo_tl%vt+n3lo_tl%wc 
+        call n3lo_tl%add 
         n3lo_tl%sum=n3lo_tl%sum*expexp2
         call lsjvcentral(n3lo_cM%vc,n3lo_vc_cM,j)
         call lsjvcentral(temp1,n3lo_wc_cM,j)
@@ -1588,13 +1617,12 @@ c      pi exchange terms
         call lsjvspinobit(n3lo_cM%vls,n3lo_vls_cM,j)
         call lsjvspinobit(temp1,n3lo_wls_cM,j)
         call isospindependent(temp1,j,n3lo_cM%wls)
-        n3lo_cM%sum=n3lo_cM%vc+n3lo_cM%wc+n3lo_cM%wt+n3lo_cM%wss
-     +  +n3lo_cM%wls+n3lo_cM%vls
+        call n3lo_cM%add
         n3lo_cM%sum=n3lo_cM%sum*expexp2
          
 c     sum all
         pot=lo_ct%sum+lo_onepi%sum+nlo_ct%sum+nlo_tp%sum+pot
-     + +n3lo_cM%sum+n3lo_ct%sum+n3lo_fd%sum+n3lo_tl%sum+n3lo_rc%sum  
+     + +n3lo_tl%sum+n3lo_ct%sum+n3lo_fd%sum+n3lo_cM%sum+n3lo_rc%sum  
         do i=1,6
         pot(i)=pot(i)/(2.0d0*pi)**3*dwnq/ree
         end do
